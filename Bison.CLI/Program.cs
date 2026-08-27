@@ -11,4 +11,3 @@ while (line != null)
     line = sr.ReadLine();
 }
 sr.Close();
-Console.ReadLine();
