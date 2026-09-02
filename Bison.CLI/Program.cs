@@ -34,7 +34,7 @@ else
             dateTime.ToString("MM/dd/yy HH':'mm':'ss") + 
             ": " + values[1];
 
-        Console.WriteLine(output);
+        Console.WriteLine("hej");
 
         line = sr.ReadLine();
     }
