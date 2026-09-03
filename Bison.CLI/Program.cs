@@ -1,6 +1,16 @@
 using SimpleDB;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.Text.Json;
 
 const string filename = "bison_observe_cli_db.csv";
+
+var messageArgument = new Argument<string>("message");
+var observeCommand = new Command("observe", "add a new observation")
+{
+    Arguments = { messageArgument }
+};
+
 
 IDatabaseRepository<Cheep> database = new CSVDatabase<Cheep>(filename);
 
@@ -12,6 +22,7 @@ if (args.Length > 0 && args[0] == "observe")
 
     database.Store(new Cheep(author, observation, timestamp));
 }
+
 else
 {
     foreach (Cheep cheep in database.Read())
