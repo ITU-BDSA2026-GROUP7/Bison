@@ -14,10 +14,19 @@ if (args.Length > 0 && args[0] == "observe")
     String author = Environment.UserName;
     long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-    File.AppendAllText(
-        filename,
-        $"{author},{observation},{timestamp}\n"
-    );    
+    // Creates the obejct we're storing
+    Cheep cheep = new Cheep(author, observation, timestamp);
+
+    // Opens the CSV file without deleting what's already there
+    using (StreamWriter sw = new StreamWriter(filename, append: true))
+    using (CsvWriter csv = new CsvWriter(sw, CultureInfo.InvariantCulture))
+    {
+        // CsvHelper takes Cheep object and turns it into valid CSV
+        csv.WriteRecord(cheep);
+
+        // Moves to the next CSV row, giving us the newline we previously manually added
+        csv.NextRecord();
+    }
 }
 
 // Reading
