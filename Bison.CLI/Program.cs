@@ -1,12 +1,13 @@
 ﻿// See https://aka.ms/new-console-template for more information
 //Console.WriteLine("Hello, World!");
 using System.IO;
-
-// Cheep record type which CsvHelper can map CSV fields into
-public record Cheep(string Author, string Message, long Timestamp);
+using CsvHelper;
+using CsvHelper.Configuration;
+using System.Globalization;
 
 String filename = "bison_observe_cli_db.csv";
 
+// Writing
 if (args.Length > 0 && args[0] == "observe")
 {
     String observation = args[1];
@@ -18,30 +19,41 @@ if (args.Length > 0 && args[0] == "observe")
         $"{author},{observation},{timestamp}\n"
     );    
 }
+
+// Reading
 else
 {
-    StreamReader sr = new StreamReader(filename);
-    sr.ReadLine();
+    using (StreamReader sr = new StreamReader(filename))
+    using (CsvReader csv = new CsvReader(sr, CultureInfo.InvariantCulture))
+    {
+        csv.Context.RegisterClassMap<CheepMap>();
 
-    String? line = sr.ReadLine();
+        IEnumerable<Cheep> cheeps = csv.GetRecords<Cheep>();
 
-    while (line != null)
-    {   
-        String[] values = line.Split(",");
+        foreach (Cheep cheep in cheeps)
+        {
+            DateTimeOffset dateTime =
+                DateTimeOffset.FromUnixTimeSeconds(cheep.Timestamp);
 
-        DateTimeOffset dateTime = 
-            DateTimeOffset.FromUnixTimeSeconds(long.Parse(values[2]));
-        
-        String output = 
-            values[0] + " @ " + 
-            dateTime.ToString("MM/dd/yy HH':'mm':'ss") + 
-            ": " + values[1];
+            String output =
+                cheep.Author + " @ " +
+                dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
+                ": " + cheep.Message;
 
-        Console.WriteLine(output);
-
-        line = sr.ReadLine();
+            Console.WriteLine(output);
+        }
     }
+}
 
+// Cheep record type which CsvHelper can map CSV fields into
+public record Cheep(string Author, string Message, long Timestamp);
 
-    sr.Close();
+public sealed class CheepMap : ClassMap<Cheep>
+{
+    public CheepMap()
+    {
+        Parameter("Author").Name("Author");
+        Parameter("Message").Name("Observation");
+        Parameter("Timestamp").Name("Timestamp");
+    }
 }
