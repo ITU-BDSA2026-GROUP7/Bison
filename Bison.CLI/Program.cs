@@ -2,6 +2,9 @@
 //Console.WriteLine("Hello, World!");
 using System.IO;
 
+// Cheep record type which CsvHelper can map CSV fields into
+public record Cheep(string Author, string Message, long Timestamp);
+
 String filename = "bison_observe_cli_db.csv";
 
 if (args.Length > 0 && args[0] == "observe")
