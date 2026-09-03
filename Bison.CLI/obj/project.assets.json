@@ -8,19 +8,19 @@
     "net8.0": []
   },
   "packageFolders": {
-    "C:\\Users\\AB\\.nuget\\packages\\": {}
+    "C:\\Users\\fejno\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\AB\\Bison\\Bison.CLI\\Bison.CLI.csproj",
+      "projectUniqueName": "C:\\Users\\fejno\\Projects\\SWEProject\\bison\\Bison.CLI\\Bison.CLI.csproj",
       "projectName": "Bison.CLI",
-      "projectPath": "C:\\Users\\AB\\Bison\\Bison.CLI\\Bison.CLI.csproj",
-      "packagesPath": "C:\\Users\\AB\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\AB\\Bison\\Bison.CLI\\obj\\",
+      "projectPath": "C:\\Users\\fejno\\Projects\\SWEProject\\bison\\Bison.CLI\\Bison.CLI.csproj",
+      "packagesPath": "C:\\Users\\fejno\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\fejno\\Projects\\SWEProject\\bison\\Bison.CLI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\AB\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\fejno\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
