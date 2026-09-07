@@ -26,7 +26,11 @@ observeCommand.SetAction(ParseResult =>
     string observation = ParseResult.GetValue(messageArgument)!;
     string author = Environment.UserName;
     long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-    database.Store(new Cheep(author, observation, timestamp));
+
+    var existing = database.Read();
+    int nextId = existing.Any() ? existing.Max(c => c.Id) + 1 : 1;
+
+    database.Store(new Cheep(nextId, author, observation, timestamp));
     return 0;
 });
 
@@ -47,4 +51,4 @@ readCommand.SetAction(ParseResult =>
 
 return rootCommand.Parse(args).Invoke();
 
-public record Cheep(string Author, string Message, long Timestamp);
+public record Cheep(int Id, string Author, string Message, long Timestamp);
