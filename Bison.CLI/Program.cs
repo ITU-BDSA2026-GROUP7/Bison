@@ -2,6 +2,7 @@ using SimpleDB;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
+using static UserInterface;
 
 const string filename = "bison_observe_cli_db.csv";
 
@@ -31,12 +32,16 @@ observeCommand.SetAction(ParseResult =>
 
 readCommand.SetAction(ParseResult =>
 {
+    /*
     foreach(Cheep cheep in database.Read())
     {
         DateTimeOffset dateTime = DateTimeOffset.FromUnixTimeSeconds(cheep.Timestamp);
         string output = cheep.Author + " @ " + dateTime.ToString("MM/dd/yy HH':'mm':'ss") + ": " + cheep.Message;
         Console.WriteLine(output);
     }
+    */
+    
+    UserInterface.PrintCheeps(database.Read());
     return 0;
 });
 
