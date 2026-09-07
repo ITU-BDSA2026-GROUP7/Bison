@@ -4,7 +4,7 @@ using System.CommandLine.Parsing;
 using static UserInterface;
 
 const string observeFile = "bison_observe_cli_db.csv";
-const string commentFile = "bison.comment.csv";
+const string commentFile = "bison_comment.csv"; 
 
 var messageArgument = new Argument<string>("message");
 var idArgument = new Argument<int>("id");
