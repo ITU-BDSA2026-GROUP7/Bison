@@ -1,8 +1,13 @@
-Author,Message,Timestamp
-ropf,"A bird at DR Byen",1690891760
-adho,"I think that is a Heron at DR Byen",1690978778
-edka,"Ardea cinerea at DR Byen",1690979858
-fejno,Heron at DR Byen,1788164086
-marku,saw a bison near the lake,1788739404
-marku,saw a bison near the lake,1788739411
-marku,saw a bison near the lake,1788739607
+Id,Author,Message,Timestamp
+1,ropf,A bird at DR Byen,1690891760
+2,adho,I think that is a Heron at DR Byen,1690978778
+3,edka,Ardea cinerea at DR Byen,1690979858
+4,fejno,Heron at DR Byen,1788164086
+5,marku,saw a bison near the lake,1788739404
+6,marku,saw a bison near the lake,1788739411
+7,marku,saw a bison near the lake,1788739607
+8,eskildkristiansen,Test kommentar-feature,1788788582
+9,eskildkristiansen,Test kommentar-feature,1788788792
+10,eskildkristiansen,Endnu en test,1788789030
+11,eskildkristiansen,Din observationstekst her,1788789255
+12,eskildkristiansen,Så en ræv ved søen,1788789264
