@@ -4,22 +4,28 @@ using System.CommandLine.Parsing;
 using System.Text.Json;
 using static UserInterface;
 
-const string filename = "bison_observe_cli_db.csv";
-
-
+const string observeFile = "bison_observe_cli_db.csv";
+const string commentFile = "bison.comment.csv";
 
 var messageArgument = new Argument<string>("message");
+var idArgument = new Argument<int>("id");
 
 var observeCommand = new Command("observe", "add a new observation");
 observeCommand.Arguments.Add(messageArgument);
 
 var readCommand = new Command("read", "show all obervation");
 
+var commentCommand = new Command("comment", "add a comment to an observation");
+commentCommand.Argument.Add(messageArgument);
+commentCommand.Argument.Add(idArgument);
+
 var rootCommand = new RootCommand();
 rootCommand.Subcommands.Add(observeCommand);
 rootCommand.Subcommands.Add(readCommand);
+rootCommand.Subcommands.Add(commentCommand);
 
-IDatabaseRepository<Cheep> database = new CSVDatabase<Cheep>(filename);
+IDatabaseRepository<Cheep> database = new CSVDatabase<Cheep>(observeFile);
+IDatabaseRepository<Comment> commentDatabase = new CSVDatabase<Comment>(commentFile);
 
 observeCommand.SetAction(ParseResult =>
 {
@@ -31,16 +37,7 @@ observeCommand.SetAction(ParseResult =>
 });
 
 readCommand.SetAction(ParseResult =>
-{
-    /*
-    foreach(Cheep cheep in database.Read())
-    {
-        DateTimeOffset dateTime = DateTimeOffset.FromUnixTimeSeconds(cheep.Timestamp);
-        string output = cheep.Author + " @ " + dateTime.ToString("MM/dd/yy HH':'mm':'ss") + ": " + cheep.Message;
-        Console.WriteLine(output);
-    }
-    */
-    
+{   
     UserInterface.PrintCheeps(database.Read());
     return 0;
 });
@@ -48,3 +45,5 @@ readCommand.SetAction(ParseResult =>
 return rootCommand.Parse(args).Invoke();
 
 public record Cheep(string Author, string Message, long Timestamp);
+
+public record Comment(string abdallah);
