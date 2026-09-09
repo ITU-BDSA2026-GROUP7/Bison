@@ -27,8 +27,8 @@ rootCommand.Subcommands.Add(readCommand);
 rootCommand.Subcommands.Add(commentCommand);
 rootCommand.Subcommands.Add(discussionCommand);
 
-IDatabaseRepository<Cheep> database = new CSVDatabase<Cheep>(observeFile);
-IDatabaseRepository<Comment> commentDatabase = new CSVDatabase<Comment>(commentFile);
+IDatabaseRepository<Cheep> database = CSVDatabase<Cheep>.Instance(observeFile);
+IDatabaseRepository<Comment> commentDatabase = CSVDatabase<Comment>.Instance(commentFile);
 
 observeCommand.SetAction(ParseResult =>
 {

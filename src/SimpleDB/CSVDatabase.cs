@@ -5,12 +5,30 @@ namespace SimpleDB;
 
 public sealed class CSVDatabase<T> : IDatabaseRepository<T>
 {
+    private static readonly Dictionary<string, CSVDatabase<T>> _instances = new();
     private readonly string _filePath;
 
-    public CSVDatabase(string filePath)
+    private CSVDatabase(string filePath)
     {
         _filePath = filePath;
     }
+
+   
+    public static CSVDatabase<T> Instance(string filePath)
+    {
+        string key = Path.GetFullPath(filePath);
+
+        if (!_instances.TryGetValue(key, out var instance))
+        {
+            instance = new CSVDatabase<T>(key);
+            _instances[key] = instance;
+        }
+
+        return instance;
+    }
+
+ 
+    internal static void ResetForTests() => _instances.Clear();
 
     public IEnumerable<T> Read(int? limit = null)
     {
