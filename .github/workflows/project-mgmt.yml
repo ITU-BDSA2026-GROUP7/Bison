@@ -1,14 +1,23 @@
+#http://docs.github.com/en/actions/tutorials/manage-your-work/add-labels-to-issues
+#Using this to make labels on issues
+
 name: Label issues
 
 on:
   issues:
-    types: [opened]
+    types:
+      - opened
 
 jobs:
-  label:
+  label_iussues:
     runs-on: ubuntu-latest
-
+    permissions:
+      issues: write
     steps:
-      - uses: actions/labeler@v5
-
+      - run: gh issue edit "$NUMBER" --add-label "$LABELS"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          LABELS: triage
 
