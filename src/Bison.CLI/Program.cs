@@ -6,11 +6,13 @@ using static UserInterface;
 const string observeFile = "bison_observe_cli_db.csv";
 const string commentFile = "bison_comment.csv"; 
 
+var locationArgument = new Argument<string>("location");
 var messageArgument = new Argument<string>("message");
 var idArgument = new Argument<int>("id");
 
 var observeCommand = new Command("observe", "add a new observation");
 observeCommand.Arguments.Add(messageArgument);
+observeCommand.Arguments.Add(locationArgument);
 
 var readCommand = new Command("read", "show all observations");
 
@@ -34,6 +36,7 @@ var observationService = new ObservationService(database);
 
 observeCommand.SetAction(ParseResult =>
 {
+    string location = ParseResult.GetValue(locationArgument)!;
     string observation = ParseResult.GetValue(messageArgument)!;
     string author = Environment.UserName;
     long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -41,7 +44,8 @@ observeCommand.SetAction(ParseResult =>
     observationService.AddObservation(
         observation,
         author,
-        timestamp);
+        timestamp,
+        location);
 
     return 0;
 });
@@ -69,7 +73,7 @@ commentCommand.SetAction(ParseResult =>
     var existingComments = commentDatabase.Read();
     int nextCommentId = existingComments.Any() ? existingComments.Max(c => c.Id) + 1 : 1;
 
-    commentDatabase.Store(new Comment(nextCommentId, author, message, timestamp, observationId));
+    commentDatabase.Store(new Comment(nextCommentId, author, message, timestamp, observationId, string.Empty));
     return 0;
 });
 
@@ -83,6 +87,6 @@ discussionCommand.SetAction(ParseResult =>
 
 return rootCommand.Parse(args).Invoke();
 
-public record Cheep(int Id, string Author, string Message, long Timestamp);
+public record Cheep(int Id, string Author, string Message, long Timestamp, string Location);
 
-public record Comment(int Id, string Author, string Message, long Timestamp, int ObservationId) : Cheep(Id, Author, Message, Timestamp);
+public record Comment(int Id, string Author, string Message, long Timestamp, int ObservationId, string Location) : Cheep(Id, Author, Message, Timestamp, Location);
