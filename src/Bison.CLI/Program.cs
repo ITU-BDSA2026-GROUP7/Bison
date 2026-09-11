@@ -30,16 +30,19 @@ rootCommand.Subcommands.Add(discussionCommand);
 IDatabaseRepository<Cheep> database = CSVDatabase<Cheep>.Instance(observeFile);
 IDatabaseRepository<Comment> commentDatabase = CSVDatabase<Comment>.Instance(commentFile);
 
+var observationService = new ObservationService(database);
+
 observeCommand.SetAction(ParseResult =>
 {
     string observation = ParseResult.GetValue(messageArgument)!;
     string author = Environment.UserName;
     long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-    var existing = database.Read();
-    int nextId = existing.Any() ? existing.Max(c => c.Id) + 1 : 1;
+    observationService.AddObservation(
+        observation,
+        author,
+        timestamp);
 
-    database.Store(new Cheep(nextId, author, observation, timestamp));
     return 0;
 });
 
