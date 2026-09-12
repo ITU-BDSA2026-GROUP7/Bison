@@ -23,11 +23,16 @@ commentCommand.Arguments.Add(messageArgument);
 var discussionCommand = new Command("discussion", "show all comments for an observation");
 discussionCommand.Arguments.Add(idArgument);
 
+var locationCommand = new Command("location", "show all observations for a location");
+locationCommand.Arguments.Add(locationArgument);
+
 var rootCommand = new RootCommand();
 rootCommand.Subcommands.Add(observeCommand);
 rootCommand.Subcommands.Add(readCommand);
 rootCommand.Subcommands.Add(commentCommand);
 rootCommand.Subcommands.Add(discussionCommand);
+rootCommand.Subcommands.Add(locationCommand);
+
 
 IDatabaseRepository<Cheep> database = CSVDatabase<Cheep>.Instance(observeFile);
 IDatabaseRepository<Comment> commentDatabase = CSVDatabase<Comment>.Instance(commentFile);
@@ -82,6 +87,13 @@ discussionCommand.SetAction(ParseResult =>
     int observationId = ParseResult.GetValue(idArgument);
     var comments = commentDatabase.Read().Where(c => c.ObservationId == observationId);
     UserInterface.PrintCheeps(comments);
+    return 0;
+});
+
+locationCommand.SetAction(ParseResult =>
+{
+    string location = ParseResult.GetValue(locationArgument)!;
+    UserInterface.PrintCheeps(observationService.GetObservationsByLocation(location));
     return 0;
 });
 

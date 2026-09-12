@@ -31,4 +31,8 @@ public class ObservationService
                 location
                 ));
     }
+    public IEnumerable<Cheep> GetObservationsByLocation(string location)
+    {
+    return _database.Read().Where(o => o.Location == location);
+    }   
 }
