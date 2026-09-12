@@ -1,13 +1,13 @@
-Id,Author,Message,Timestamp
-1,ropf,A bird at DR Byen,1690891760
-2,adho,I think that is a Heron at DR Byen,1690978778
-3,edka,Ardea cinerea at DR Byen,1690979858
-4,fejno,Heron at DR Byen,1788164086
-5,marku,saw a bison near the lake,1788739404
-6,marku,saw a bison near the lake,1788739411
-7,marku,saw a bison near the lake,1788739607
-8,eskildkristiansen,Test kommentar-feature,1788788582
-9,eskildkristiansen,Test kommentar-feature,1788788792
-10,eskildkristiansen,Endnu en test,1788789030
-11,eskildkristiansen,Din observationstekst her,1788789255
-12,eskildkristiansen,Så en ræv ved søen,1788789264
+Id,Author,Message,Timestamp,Location
+1,ropf,A bird at DR Byen,1690891760,DR Byen
+2,adho,I think that is a Heron at DR Byen,1690978778,DR Byen
+3,edka,Ardea cinerea at DR Byen,1690979858,DR Byen
+4,fejno,Heron at DR Byen,1788164086,DR Byen
+5,marku,saw a bison near the lake,1788739404,The Lake
+6,marku,saw a bison near the lake,1788739411,The Lake
+7,marku,saw a bison near the lake,1788739607,The Lake
+8,eskildkristiansen,Test kommentar-feature,1788788582,Unknown
+9,eskildkristiansen,Test kommentar-feature,1788788792,Unknown
+10,eskildkristiansen,Endnu en test,1788789030,Unknown
+11,eskildkristiansen,Din observationstekst her,1788789255,Unknown
+12,eskildkristiansen,Så en ræv ved søen,1788789264,Søen
