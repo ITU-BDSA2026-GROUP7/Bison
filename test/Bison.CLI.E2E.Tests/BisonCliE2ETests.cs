@@ -23,7 +23,7 @@ public class BisonCliE2ETests
                     "src", "Bison.CLI"));
 
         process.StartInfo.Arguments =
-            $"run --project \"{projectPath}\" -- observe \"Penguin\"";
+            $"run --project \"{projectPath}\" -- observe \"Penguin\" \"Antarctica\"";
         
         process.StartInfo.WorkingDirectory = tempDirectory;
 
@@ -64,8 +64,8 @@ public class BisonCliE2ETests
 
         File.WriteAllText(
             databasePath,
-            "Id,Author,Message,Timestamp\r\n" +
-            "1,Alice,Hello world,1725625800\r\n");
+            "Id,Author,Message,Timestamp,Location\r\n" +
+            "1,Alice,Hello world,1725625800,SomeLocation\r\n");
 
         var process = new Process();
 
