@@ -11,9 +11,9 @@ public class ObservationServiceTests
 
         var database = CSVDatabase<Cheep>.Instance(observationFile);
 
-        database.Store(new Cheep(1, "User1", "First", 0));
-        database.Store(new Cheep(2, "User2", "Second", 0));
-        database.Store(new Cheep(7, "User3", "Seventh", 0));
+        database.Store(new Cheep(1, "User1", "First", 0, "LocationA"));
+        database.Store(new Cheep(2, "User2", "Second", 0, "LocationB"));
+        database.Store(new Cheep(7, "User3", "Seventh", 0, "LocationC"));
 
         var service = new ObservationService(database);
 
@@ -21,7 +21,8 @@ public class ObservationServiceTests
         service.AddObservation(
             "New observation",
             "TestUser",
-            0);
+            0,
+            "SomeLocation");
         
         // Assert
         var observations = database.Read();
