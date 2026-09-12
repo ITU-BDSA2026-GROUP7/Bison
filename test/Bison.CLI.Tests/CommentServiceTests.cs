@@ -22,7 +22,8 @@ public class CommentServiceTests
             observationId: 999,
             message: "This should not be stored",
             author: "TestUser",
-            timestamp: 0);
+            timestamp: 0,
+            location: "SomeLocation");
         
     
         // Assert

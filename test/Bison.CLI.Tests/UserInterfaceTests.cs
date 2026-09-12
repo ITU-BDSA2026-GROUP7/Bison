@@ -8,7 +8,8 @@ public class UserInterfaceTests
             1,
             "TestUser",
             "Hello world",
-            1725625800);
+            1725625800,
+            "SomeLocation");
 
         using var output = new StringWriter();
         Console.SetOut(output);
