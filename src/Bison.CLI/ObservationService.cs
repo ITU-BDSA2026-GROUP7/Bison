@@ -12,7 +12,9 @@ public class ObservationService
     public void AddObservation(
         string message,
         string author,
-        long timestamp)
+        long timestamp,
+        string location
+        )
     {
         var existing = _database.Read();
 
@@ -25,6 +27,12 @@ public class ObservationService
                 nextId,
                 author,
                 message,
-                timestamp));
+                timestamp,
+                location
+                ));
     }
+    public IEnumerable<Cheep> GetObservationsByLocation(string location)
+    {
+    return _database.Read().Where(o => o.Location == location);
+    }   
 }

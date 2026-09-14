@@ -17,7 +17,8 @@ public class CommentService
         int observationId,
         string message,
         string author,
-        long timestamp)
+        long timestamp,
+        string location)
     {
         bool observationExists = _database
             .Read()
@@ -40,6 +41,7 @@ public class CommentService
                 author,
                 message,
                 timestamp,
-                observationId));
+                observationId,
+                location));
     }
 }

@@ -23,7 +23,7 @@ public class BisonCliE2ETests
                     "src", "Bison.CLI"));
 
         process.StartInfo.Arguments =
-            $"run --project \"{projectPath}\" -- observe \"Penguin\"";
+            $"run --project \"{projectPath}\" -- observe \"Penguin\" \"Antarctica\"";
         
         process.StartInfo.WorkingDirectory = tempDirectory;
 
@@ -64,8 +64,8 @@ public class BisonCliE2ETests
 
         File.WriteAllText(
             databasePath,
-            "Id,Author,Message,Timestamp\r\n" +
-            "1,Alice,Hello world,1725625800\r\n");
+            "Id,Author,Message,Timestamp,Location\r\n" +
+            "1,Alice,Hello world,1725625800,SomeLocation\r\n");
 
         var process = new Process();
 
@@ -101,5 +101,55 @@ public class BisonCliE2ETests
 
         // Clean up
         Directory.Delete(tempDirectory, true);
+    }
+
+    [Fact]
+    public void Location_PrintsMatchingObservation()
+    {
+        // Arrange
+        string tempDirectory =
+            Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+        Directory.CreateDirectory(tempDirectory);
+
+        string projectPath =
+            Path.GetFullPath(
+                Path.Combine(
+                    AppContext.BaseDirectory,
+                    "..", "..", "..", "..", "..",
+                    "src", "Bison.CLI"));
+
+        RunCli(projectPath, tempDirectory, "observe \"Penguin\" \"Antarctica\"");
+        RunCli(projectPath, tempDirectory, "observe \"Puffin\" \"Iceland\"");
+
+        // Act
+        string output = RunCli(projectPath, tempDirectory, "location \"Antarctica\"");
+
+        // Assert
+        Assert.Contains("Penguin", output);
+        Assert.DoesNotContain("Puffin", output);
+
+        // Clean up
+        Directory.Delete(tempDirectory, true);
+    }
+
+    private static string RunCli(string projectPath, string workingDirectory, string arguments)
+    {
+        var process = new Process();
+
+        process.StartInfo.FileName = "dotnet";
+        process.StartInfo.Arguments = $"run --project \"{projectPath}\" -- {arguments}";
+        process.StartInfo.WorkingDirectory = workingDirectory;
+        process.StartInfo.RedirectStandardOutput = true;
+        process.StartInfo.RedirectStandardError = true;
+        process.StartInfo.UseShellExecute = false;
+
+        process.Start();
+
+        string output = process.StandardOutput.ReadToEnd();
+
+        process.WaitForExit();
+
+        return output;
     }
 }
