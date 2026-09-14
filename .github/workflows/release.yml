@@ -32,7 +32,7 @@ jobs:
 
       - name: Publish Windows
         run: |
-          dotnet publish Bison.CLI/Bison.CLI.csproj \
+          dotnet publish src/Bison.CLI/Bison.CLI.csproj \
             -c Release \
             -r win-x64 \
             --self-contained false \
@@ -43,7 +43,7 @@ jobs:
 
       - name: Publish macOS
         run: |
-          dotnet publish Bison.CLI/Bison.CLI.csproj \
+          dotnet publish src/Bison.CLI/Bison.CLI.csproj \
             -c Release \
             -r osx-x64 \
             --self-contained false \
@@ -54,7 +54,7 @@ jobs:
 
       - name: Publish Linux
         run: |
-          dotnet publish Bison.CLI/Bison.CLI.csproj \
+          dotnet publish src/Bison.CLI/Bison.CLI.csproj \
             -c Release \
             -r linux-x64 \
             --self-contained false \
