@@ -1,3 +1,4 @@
+using SimpleDB;
 public class UserInterfaceTests
 {
     [Fact]

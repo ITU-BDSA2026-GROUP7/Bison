@@ -1,4 +1,4 @@
-using SimpleDB;
+namespace SimpleDB;
 
 public class ObservationService
 {
