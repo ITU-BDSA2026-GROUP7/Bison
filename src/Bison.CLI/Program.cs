@@ -52,7 +52,7 @@ readCommand.SetAction(async ParseResult =>
     var observations = await client.GetFromJsonAsync<List<ObservationRequest>>(
     $"/observations");
 
-    foreach (var observation in observations)
+    foreach (ObservationRequest observation in observations!)
     {
         DateTimeOffset dateTime =
             DateTimeOffset.FromUnixTimeSeconds(observation.Timestamp);
@@ -64,8 +64,6 @@ readCommand.SetAction(async ParseResult =>
 
         Console.WriteLine(output);
     }
-    
-    // bruger ik UserInterface til at printe fordi det kobler Bison.CLI og SimpleDB sammen
 
     return 0;
 });
@@ -95,17 +93,43 @@ commentCommand.SetAction(async ParseResult =>
 discussionCommand.SetAction(async ParseResult =>
 {
     int observationId = ParseResult.GetValue(idArgument);
-    await client.GetFromJsonAsync<List<CommentRequest>>(
+    var comments = await client.GetFromJsonAsync<List<CommentRequest>>(
     $"/comments?observationId={observationId}");
 
+    foreach (CommentRequest comment in comments!)
+    {
+        DateTimeOffset dateTime =
+            DateTimeOffset.FromUnixTimeSeconds(comment.Timestamp);
+
+        string output =
+            comment.Author + " @ " +
+            dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
+            ": " + comment.Message;
+
+        Console.WriteLine(output);
+    }
+    
     return 0;
 });
 
 locationCommand.SetAction(async ParseResult =>
 {
     string location = ParseResult.GetValue(locationArgument)!;
-    await client.GetFromJsonAsync<List<ObservationRequest>>(
+    var observations = await client.GetFromJsonAsync<List<ObservationRequest>>(
     $"/observations?location={location}");
+
+    foreach (ObservationRequest observation in observations!)
+    {
+        DateTimeOffset dateTime =
+            DateTimeOffset.FromUnixTimeSeconds(observation.Timestamp);
+
+        string output =
+            observation.Author + " @ " +
+            dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
+            ": " + observation.Message;
+
+        Console.WriteLine(output);
+    }
 
     return 0;
 });

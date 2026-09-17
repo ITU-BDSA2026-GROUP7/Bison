@@ -14,8 +14,6 @@ var app = builder.Build();
 
 app.MapPost("/observation", (Cheep request) =>
 {
-    Console.WriteLine("POST /observations received");
-
     observationService.AddObservation(
         request.Message,
         request.Author,
@@ -32,7 +30,7 @@ app.MapGet("/observations", () =>
     
 app.MapPost("/comment", (Comment request) =>
 {
-    if ((database.Read().Any(o => o.Id == request.ObservationId))) {
+    if (database.Read().Any(o => o.Id == request.ObservationId)) {
 
         commentService.AddComment(
             request.ObservationId,
@@ -50,15 +48,13 @@ app.MapPost("/comment", (Comment request) =>
 
 app.MapGet("/comments", (int observationId) => 
 {
-    commentDatabase.Read().Where(comment => comment.ObservationId == observationId);
-    return Results.Ok();
+    return Results.Ok(commentDatabase.Read().Where(comment => comment.ObservationId == observationId));
 });
  
 
 app.MapGet("/location", (string location) =>
 {
-    database.Read().Where(observation => observation.Location == location);
-    return Results.Ok();
+    return Results.Ok(database.Read().Where(observation => observation.Location == location));
 });
 
 app.Run();
