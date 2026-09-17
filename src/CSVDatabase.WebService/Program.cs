@@ -12,7 +12,7 @@ var commentService = new CommentService(database, commentDatabase);
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-app.MapPost("/observation", (ObservationRequest request) =>
+app.MapPost("/observation", (Cheep request) =>
 {
     Console.WriteLine("POST /observations received");
 
@@ -27,11 +27,10 @@ app.MapPost("/observation", (ObservationRequest request) =>
 
 app.MapGet("/observations", () => 
 {
-    Console.WriteLine($"Returning {observations.Count()} observations");
     return database.Read();
 });
     
-app.MapPost("/comment", (CommentRequest request) =>
+app.MapPost("/comment", (Comment request) =>
 {
     if ((database.Read().Any(o => o.Id == request.ObservationId))) {
 
@@ -49,14 +48,21 @@ app.MapPost("/comment", (CommentRequest request) =>
 
 });
 
-app.MapGet("/comments", (int observationId) =>
-    commentDatabase.Read().Where(comment => comment.ObservationId == observationId));
+app.MapGet("/comments", (int observationId) => 
+{
+    commentDatabase.Read().Where(comment => comment.ObservationId == observationId);
+    return Results.Ok();
+});
+ 
 
 app.MapGet("/location", (string location) =>
-    database.Read().Where(observation => observation.Location == location));
+{
+    database.Read().Where(observation => observation.Location == location);
+    return Results.Ok();
+});
 
 app.Run();
 
-public record ObservationRequest(string Author, string Message, long Timestamp, string? Location = null);
+// public record ObservationRequest(string Author, string Message, long Timestamp, string? Location = null);
 
-public record CommentRequest(string Author, string Message, long Timestamp, int ObservationId, string? Location = null);
+// public record CommentRequest(string Author, string Message, long Timestamp, int ObservationId, string? Location = null);

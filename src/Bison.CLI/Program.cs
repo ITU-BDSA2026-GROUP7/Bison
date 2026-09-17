@@ -49,9 +49,22 @@ observeCommand.SetAction(async ParseResult =>
 
 readCommand.SetAction(async ParseResult =>
 {
-    await client.GetFromJsonAsync<List<ObservationRequest>>(
+    var observations = await client.GetFromJsonAsync<List<ObservationRequest>>(
     $"/observations");
 
+    foreach (var observation in observations)
+    {
+        DateTimeOffset dateTime =
+            DateTimeOffset.FromUnixTimeSeconds(observation.Timestamp);
+
+        string output =
+            observation.Author + " @ " +
+            dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
+            ": " + observation.Message;
+
+        Console.WriteLine(output);
+    }
+    
     return 0;
 });
 
