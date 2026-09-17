@@ -14,6 +14,8 @@ var app = builder.Build();
 
 app.MapPost("/observation", (ObservationRequest request) =>
 {
+    Console.WriteLine("POST /observations received");
+
     observationService.AddObservation(
         request.Message,
         request.Author,
@@ -23,22 +25,35 @@ app.MapPost("/observation", (ObservationRequest request) =>
     return Results.Ok();
 });
 
-app.MapGet("/observations", () => database.Read());
-
+app.MapGet("/observations", () => 
+{
+    Console.WriteLine($"Returning {observations.Count()} observations");
+    return database.Read();
+});
+    
 app.MapPost("/comment", (CommentRequest request) =>
 {
-    commentService.AddComment(
-        request.ObservationId,
-        request.Message,
-        request.Author,
-        request.Timestamp,
-        request.Location ?? string.Empty);
+    if ((database.Read().Any(o => o.Id == request.ObservationId))) {
 
-    return Results.Ok();
+        commentService.AddComment(
+            request.ObservationId,
+            request.Message,
+            request.Author,
+            request.Timestamp,
+            request.Location ?? string.Empty);
+
+        return Results.Ok();
+    }
+    
+    else return Results.BadRequest("Observation ID does not exist.");
+
 });
 
 app.MapGet("/comments", (int observationId) =>
     commentDatabase.Read().Where(comment => comment.ObservationId == observationId));
+
+app.MapGet("/location", (string location) =>
+    database.Read().Where(observation => observation.Location == location));
 
 app.Run();
 
