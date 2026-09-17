@@ -27,7 +27,7 @@ app.MapPost("/observation", (Cheep request) =>
 
 app.MapGet("/observations", () => 
 {
-    return database.Read();
+    return Results.Ok(database.Read());
 });
     
 app.MapPost("/comment", (Comment request) =>

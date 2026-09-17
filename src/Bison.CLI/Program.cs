@@ -65,6 +65,8 @@ readCommand.SetAction(async ParseResult =>
         Console.WriteLine(output);
     }
     
+    // bruger ik UserInterface til at printe fordi det kobler Bison.CLI og SimpleDB sammen
+
     return 0;
 });
 
