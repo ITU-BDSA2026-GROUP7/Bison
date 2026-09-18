@@ -135,7 +135,3 @@ locationCommand.SetAction(async ParseResult =>
 });
 
 return rootCommand.Parse(args).Invoke();
-
-public record ObservationRequest(string Author, string Message, long Timestamp, string? Location = null);
-
-public record CommentRequest(string Author, string Message, long Timestamp, int ObservationId, string? Location = null);
