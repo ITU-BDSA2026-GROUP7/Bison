@@ -116,7 +116,7 @@ locationCommand.SetAction(async ParseResult =>
 {
     string location = ParseResult.GetValue(locationArgument)!;
     var observations = await client.GetFromJsonAsync<List<ObservationRequest>>(
-    $"/observations?location={location}");
+    $"/location?location={location}");
 
     foreach (ObservationRequest observation in observations!)
     {
