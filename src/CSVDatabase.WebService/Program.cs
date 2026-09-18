@@ -54,7 +54,7 @@ app.MapGet("/comments", (int observationId) =>
 
 app.MapGet("/location", (string location) =>
 {
-    return Results.Ok(database.Read().Where(observation => observation.Location == location));
+    return Results.Ok(observationService.GetObservationsByLocation(location));
 });
 
 app.Run();
