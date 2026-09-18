@@ -52,18 +52,7 @@ readCommand.SetAction(async ParseResult =>
     var observations = await client.GetFromJsonAsync<List<ObservationRequest>>(
     $"/observations");
 
-    foreach (ObservationRequest observation in observations!)
-    {
-        DateTimeOffset dateTime =
-            DateTimeOffset.FromUnixTimeSeconds(observation.Timestamp);
-
-        string output =
-            observation.Author + " @ " +
-            dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
-            ": " + observation.Message;
-
-        Console.WriteLine(output);
-    }
+    PrintCheeps(observations!);
 
     return 0;
 });
@@ -72,15 +61,6 @@ commentCommand.SetAction(async ParseResult =>
 {
     int observationId = ParseResult.GetValue(idArgument);
     string message = ParseResult.GetValue(messageArgument)!;
-
-    /*
-    bool observationExists = database.Read().Any(o => o.Id == observationId);
-    if (!observationExists)
-    {
-        return 0; // silently dropped if the observation id doesn't exist
-    }
-    */
-
     string author = Environment.UserName;
     long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     var comment = new CommentRequest(author, message, timestamp, observationId);
@@ -96,18 +76,7 @@ discussionCommand.SetAction(async ParseResult =>
     var comments = await client.GetFromJsonAsync<List<CommentRequest>>(
     $"/comments?observationId={observationId}");
 
-    foreach (CommentRequest comment in comments!)
-    {
-        DateTimeOffset dateTime =
-            DateTimeOffset.FromUnixTimeSeconds(comment.Timestamp);
-
-        string output =
-            comment.Author + " @ " +
-            dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
-            ": " + comment.Message;
-
-        Console.WriteLine(output);
-    }
+    PrintComments(comments!);
     
     return 0;
 });
@@ -118,18 +87,7 @@ locationCommand.SetAction(async ParseResult =>
     var observations = await client.GetFromJsonAsync<List<ObservationRequest>>(
     $"/location?location={location}");
 
-    foreach (ObservationRequest observation in observations!)
-    {
-        DateTimeOffset dateTime =
-            DateTimeOffset.FromUnixTimeSeconds(observation.Timestamp);
-
-        string output =
-            observation.Author + " @ " +
-            dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
-            ": " + observation.Message;
-
-        Console.WriteLine(output);
-    }
+    PrintCheeps(observations!);
 
     return 0;
 });
