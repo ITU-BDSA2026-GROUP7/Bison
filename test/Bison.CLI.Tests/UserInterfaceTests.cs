@@ -1,22 +1,22 @@
-using SimpleDB;
+
 public class UserInterfaceTests
 {
     [Fact]
     public void PrintCheeps_ConvertsUnixTimestampToReadableDate()
     {
         // Arrange
-        var cheep = new Cheep(
-            1,
+        var cheep = new CommentRequest(
             "TestUser",
             "Hello world",
             1725625800,
+            1,
             "SomeLocation");
 
         using var output = new StringWriter();
         Console.SetOut(output);
 
         // Act
-        UserInterface.PrintCheeps(new[] { cheep });
+        UserInterface.PrintComments(new[] { cheep });
 
         // Assert
         string result = output.ToString();
