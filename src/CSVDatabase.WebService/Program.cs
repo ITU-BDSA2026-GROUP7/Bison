@@ -1,7 +1,9 @@
 using SimpleDB;
 
-const string observeFile = "bison_observe_cli_db.csv";
-const string commentFile = "bison_comment.csv";
+string observeFile = Environment.GetEnvironmentVariable("OBSERVE_FILE") ?? "bison_observe_cli_db.csv";
+string commentFile = Environment.GetEnvironmentVariable("COMMENT_FILE") ?? "bison_comment.csv";
+
+Console.WriteLine(Environment.GetEnvironmentVariable("OBSERVE_FILE"));
 
 IDatabaseRepository<Cheep> database = CSVDatabase<Cheep>.Instance(observeFile);
 IDatabaseRepository<Comment> commentDatabase = CSVDatabase<Comment>.Instance(commentFile);

@@ -11,6 +11,9 @@ public class BisonCliE2ETests
 
         Directory.CreateDirectory(tempDirectory);
 
+        string databasePath =
+            Path.Combine(tempDirectory, "bison_observe_cli_db.csv");
+
         var process = new Process();
 
         process.StartInfo.FileName = "dotnet";
@@ -44,23 +47,18 @@ public class BisonCliE2ETests
         Thread.Sleep(3000);
 
         process.Start();
-        
-        process.WaitForExit();  
-
-        server.Kill();
-        server.WaitForExit();
+        process.WaitForExit();
 
         // Assert
-        string databasePath =
-            Path.Combine(tempDirectory, "bison_observe_cli_db.csv");
-
         string databaseContents =
             File.ReadAllText(databasePath);
 
-    
         Assert.Contains("Penguin", databaseContents);
 
         // Clean up
+        server.Kill();
+        server.WaitForExit();
+
         Directory.Delete(tempDirectory, true);
     }
 
@@ -114,13 +112,9 @@ public class BisonCliE2ETests
         Thread.Sleep(3000);
 
         process.Start();
-
-        string output = process.StandardOutput.ReadToEnd();
-
         process.WaitForExit();
 
-        server.Kill();
-        server.WaitForExit();
+        string output = process.StandardOutput.ReadToEnd();
 
         // Assert
         Assert.Contains(
@@ -128,6 +122,9 @@ public class BisonCliE2ETests
             output);
 
         // Clean up
+        server.Kill();
+        server.WaitForExit();
+
         Directory.Delete(tempDirectory, true);
     }
 
@@ -139,6 +136,9 @@ public class BisonCliE2ETests
             Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
         Directory.CreateDirectory(tempDirectory);
+
+        string databasePath =
+            Path.Combine(tempDirectory, "bison_observe_cli_db.csv");
 
         string projectPath =
             Path.GetFullPath(
@@ -189,9 +189,9 @@ public class BisonCliE2ETests
 
         process.Start();
 
-        string output = process.StandardOutput.ReadToEnd();
-
         process.WaitForExit();
+
+        string output = process.StandardOutput.ReadToEnd();
 
         return output;
     }
@@ -205,6 +205,8 @@ public class BisonCliE2ETests
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
         process.StartInfo.UseShellExecute = false;
+        process.StartInfo.EnvironmentVariables["OBSERVE_FILE"] = Path.Combine(workingDirectory, "bison_observe_cli_db.csv");
+        process.StartInfo.EnvironmentVariables["COMMENT_FILE"] = Path.Combine(workingDirectory, "bison_comment.csv");
 
         process.Start();
 
