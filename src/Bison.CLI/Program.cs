@@ -34,39 +34,12 @@ rootCommand.Subcommands.Add(discussionCommand);
 rootCommand.Subcommands.Add(locationCommand);
 
 var taxonomy = TaxonomyLoader.Load();
-Console.WriteLine("Taxonomy loaded");
-
-var fishHeron = taxonomy.GetByVernacularName("Fiskehejre");
-if (fishHeron != null){
-    Console.WriteLine($"Found: {fishHeron.ScientificName}");
-} else {
-    Console.WriteLine("Taxon not found");
-}
-
-var taxon = taxonomy.GetById("MSTSNM:Arter:c28811f4-f785-ea11-aa77-501ac539d1ea");
-Console.WriteLine(taxon?.ScientificName);
-
-var parent = taxonomy.GetParent("MSTSNM:Arter:c28811f4-f785-ea11-aa77-501ac539d1ea");
-Console.WriteLine(parent?.ScientificName);
-
-var children = taxonomy.GetChildren("MSTSNM:Arter:7f9ef9f3-f785-ea11-aa77-501ac539d1ea");
-foreach(var child in children)
-{
-    Console.WriteLine(child.ScientificName);
-}
 
 IDatabaseRepository<Cheep> database = CSVDatabase<Cheep>.Instance(observeFile);
 IDatabaseRepository<Comment> commentDatabase = CSVDatabase<Comment>.Instance(commentFile);
 
 var observationService = new ObservationService(database);
 
-
-
-Console.WriteLine(fishHeron == null ? "Fiskehjere not found" : fishHeron.ScientificName);
-Console.WriteLine($"Loaded {taxonomy.Count()} taxons");
-
-
-Console.WriteLine(fishHeron?.ScientificName);
 
 observeCommand.SetAction(ParseResult =>
 {
