@@ -16,4 +16,9 @@
     <ProjectReference Include="..\SimpleDB\SimpleDB.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Taxons\joined.csv" />
+  </ItemGroup>
+
+
 </Project>
