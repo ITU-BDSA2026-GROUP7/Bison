@@ -50,7 +50,7 @@ public class BisonCliE2ETests
 
         // Act
         var server = RunServer(serverPath, tempDirectory, url);  
-        await WaitForServerAsync();
+        await WaitForServerAsync(url);
 
         process.Start();
 
@@ -133,7 +133,7 @@ public class BisonCliE2ETests
 
         // Act
         var server = RunServer(serverPath, tempDirectory, url);
-        await WaitForServerAsync();
+        await WaitForServerAsync(url);
 
         process.Start();
 
@@ -195,7 +195,7 @@ public class BisonCliE2ETests
        
         // Act
         var server = RunServer(serverPath, tempDirectory, url);
-        await WaitForServerAsync();
+        await WaitForServerAsync(url);
 
         RunCli(projectPath, tempDirectory, "observe \"Penguin\" \"Antarctica\"", url);
         RunCli(projectPath, tempDirectory, "observe \"Puffin\" \"Iceland\"", url);
@@ -261,7 +261,7 @@ public class BisonCliE2ETests
 
         return process;
     }
-    private static async Task WaitForServerAsync() {
+    private static async Task WaitForServerAsync(string url) {
         using var client = new HttpClient();
         for (int i = 0; i < 30; i++)
         {
@@ -269,7 +269,7 @@ public class BisonCliE2ETests
             {
                 var response =
                     await client.GetAsync(
-                        "http://localhost:51234/observations");
+                        url + "/observations");
 
                 if (response.IsSuccessStatusCode)
                     return;
