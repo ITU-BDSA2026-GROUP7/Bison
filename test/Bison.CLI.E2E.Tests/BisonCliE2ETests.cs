@@ -46,9 +46,23 @@ public class BisonCliE2ETests
         await WaitForServerAsync();
 
         process.Start();
+
+        string processOutput = process.StandardOutput.ReadToEnd();
+        string processError = process.StandardError.ReadToEnd();
+
         process.WaitForExit();
 
-        // Assert
+        Assert.True(process.ExitCode == 0,
+            $"CLI failed.\nSTDOUT:\n{processOutput}\nSTDERR:\n{processError}");
+
+        if (server.HasExited)
+        {
+            string serverError = server.StandardError.ReadToEnd();
+
+            Assert.Fail(
+                $"Server exited unexpectedly.\nSTDERR:\n{serverError}");
+        }
+
         string databaseContents =
             File.ReadAllText(databasePath);
 
@@ -109,17 +123,27 @@ public class BisonCliE2ETests
         var server = RunServer(serverPath, tempDirectory);
         await WaitForServerAsync();
 
-        Thread.Sleep(3000);
-
         process.Start();
+
+        string processOutput = process.StandardOutput.ReadToEnd();
+        string processError = process.StandardError.ReadToEnd();
+
         process.WaitForExit();
 
-        string output = process.StandardOutput.ReadToEnd();
+        Assert.True(process.ExitCode == 0,
+            $"CLI failed.\nSTDOUT:\n{processOutput}\nSTDERR:\n{processError}");
 
-        // Assert
+        if (server.HasExited)
+        {
+            string serverError = server.StandardError.ReadToEnd();
+
+            Assert.Fail(
+                $"Server exited unexpectedly.\nSTDERR:\n{serverError}");
+        }
+
         Assert.Contains(
             "Alice @ 09/06/24 12:30:00: Hello world",
-            output);
+            processOutput);
 
         // Clean up
         server.Kill();
@@ -162,9 +186,22 @@ public class BisonCliE2ETests
         RunCli(projectPath, tempDirectory, "observe \"Penguin\" \"Antarctica\"");
         RunCli(projectPath, tempDirectory, "observe \"Puffin\" \"Iceland\"");
 
-        string output = RunCli(projectPath, tempDirectory, "location \"Antarctica\"");
+        Process process = RunCli(projectPath, tempDirectory, "location \"Antarctica\"");
 
-        // Assert
+        string output = process.StandardOutput.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
+
+        Assert.True(process.ExitCode == 0,
+            $"CLI failed.\nSTDOUT:\n{output}\nSTDERR:\n{error}");
+            
+        if (server.HasExited)
+        {
+            string serverError = server.StandardError.ReadToEnd();
+
+            Assert.Fail(
+                $"Server exited unexpectedly.\nSTDERR:\n{serverError}");
+        }
+
         Assert.Contains("Penguin", output);
         Assert.DoesNotContain("Puffin", output);
 
@@ -175,7 +212,7 @@ public class BisonCliE2ETests
         Directory.Delete(tempDirectory, true);
     }
 
-    private static string RunCli(string projectPath, string workingDirectory, string arguments)
+    private static Process RunCli(string projectPath, string workingDirectory, string arguments)
     {
         var process = new Process();
 
@@ -190,9 +227,7 @@ public class BisonCliE2ETests
 
         process.WaitForExit();
 
-        string output = process.StandardOutput.ReadToEnd();
-
-        return output;
+        return process;
     }
     private static Process RunServer(string projectPath, string workingDirectory)
     {
