@@ -4,7 +4,7 @@ using System.CommandLine.Parsing;
 using static UserInterface;
 
 var client = new HttpClient();
-client.BaseAddress = new Uri("http://localhost:5000");
+client.BaseAddress = new Uri("http://localhost:51234");
 
 var locationArgument = new Argument<string>("location");
 var messageArgument = new Argument<string>("message");

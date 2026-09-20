@@ -3,7 +3,7 @@ using System.Diagnostics;
 public class BisonCliE2ETests
 {
     [Fact]
-    public void Observe_StoresObservationInDatabase()
+    public async Task Observe_StoresObservationInDatabase()
     {
         // Arrange
         string tempDirectory =
@@ -43,8 +43,7 @@ public class BisonCliE2ETests
 
         // Act
         var server = RunServer(serverPath, tempDirectory);  
-
-        Thread.Sleep(3000);
+        await WaitForServerAsync();
 
         process.Start();
         process.WaitForExit();
@@ -63,7 +62,7 @@ public class BisonCliE2ETests
     }
 
     [Fact]
-    public void Read_PrintsObservationsToConsole()
+    public async Task Read_PrintsObservationsToConsole()
     {
         // Arrange
         string tempDirectory =
@@ -108,6 +107,7 @@ public class BisonCliE2ETests
 
         // Act
         var server = RunServer(serverPath, tempDirectory);
+        await WaitForServerAsync();
 
         Thread.Sleep(3000);
 
@@ -129,7 +129,7 @@ public class BisonCliE2ETests
     }
 
     [Fact]
-    public void Location_PrintsMatchingObservation()
+    public async Task Location_PrintsMatchingObservation()
     {
         // Arrange
         string tempDirectory =
@@ -157,8 +157,7 @@ public class BisonCliE2ETests
        
         // Act
         var server = RunServer(serverPath, tempDirectory);
-
-        Thread.Sleep(3000);
+        await WaitForServerAsync();
 
         RunCli(projectPath, tempDirectory, "observe \"Penguin\" \"Antarctica\"");
         RunCli(projectPath, tempDirectory, "observe \"Puffin\" \"Iceland\"");
@@ -200,7 +199,7 @@ public class BisonCliE2ETests
         var process = new Process();
 
         process.StartInfo.FileName = "dotnet";
-        process.StartInfo.Arguments = $"run --project \"{projectPath}\" urls -- http://localhost:5000";
+        process.StartInfo.Arguments = $"run --project \"{projectPath}\" --urls http://localhost:51234";
         process.StartInfo.WorkingDirectory = workingDirectory;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
@@ -211,5 +210,26 @@ public class BisonCliE2ETests
         process.Start();
 
         return process;
+    }
+    private static async Task WaitForServerAsync() {
+        using var client = new HttpClient();
+        for (int i = 0; i < 30; i++)
+        {
+            try
+            {
+                var response =
+                    await client.GetAsync(
+                        "http://localhost:51234/observations");
+
+                if (response.IsSuccessStatusCode)
+                    return;
+            }
+            catch
+            {
+            }
+
+        await Task.Delay(1000);
+        }
+        throw new Exception("Server never became available.");
     }
 }
