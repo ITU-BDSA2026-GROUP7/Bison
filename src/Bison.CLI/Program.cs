@@ -3,8 +3,12 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using static UserInterface;
 
+string baseUrl =
+    Environment.GetEnvironmentVariable("BISON_SERVER_URL")
+    ?? "http://localhost:51234";
+
 var client = new HttpClient();
-client.BaseAddress = new Uri("http://localhost:51234");
+client.BaseAddress = new Uri(baseUrl);
 
 var locationArgument = new Argument<string>("location");
 var messageArgument = new Argument<string>("message");

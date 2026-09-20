@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 
 public class BisonCliE2ETests
 {
@@ -40,9 +42,14 @@ public class BisonCliE2ETests
                     AppContext.BaseDirectory,
                     "..", "..", "..", "..", "..",
                     "src", "CSVDatabase.WebService"));
+        
+        int port = GetFreePort();
+        string url = $"http://localhost:{port}";
+
+        process.StartInfo.EnvironmentVariables["BISON_SERVER_URL"] = url;
 
         // Act
-        var server = RunServer(serverPath, tempDirectory);  
+        var server = RunServer(serverPath, tempDirectory, url);  
         await WaitForServerAsync();
 
         process.Start();
@@ -119,8 +126,13 @@ public class BisonCliE2ETests
                     "..", "..", "..", "..", "..",
                     "src", "CSVDatabase.WebService"));
 
+        int port = GetFreePort();
+        string url = $"http://localhost:{port}";
+
+        process.StartInfo.EnvironmentVariables["BISON_SERVER_URL"] = url;
+
         // Act
-        var server = RunServer(serverPath, tempDirectory);
+        var server = RunServer(serverPath, tempDirectory, url);
         await WaitForServerAsync();
 
         process.Start();
@@ -178,22 +190,24 @@ public class BisonCliE2ETests
                     "..", "..", "..", "..", "..",
                     "src", "CSVDatabase.WebService"));
 
+        int port = GetFreePort();
+        string url = $"http://localhost:{port}";
        
         // Act
-        var server = RunServer(serverPath, tempDirectory);
+        var server = RunServer(serverPath, tempDirectory, url);
         await WaitForServerAsync();
 
-        RunCli(projectPath, tempDirectory, "observe \"Penguin\" \"Antarctica\"");
-        RunCli(projectPath, tempDirectory, "observe \"Puffin\" \"Iceland\"");
+        RunCli(projectPath, tempDirectory, "observe \"Penguin\" \"Antarctica\"", url);
+        RunCli(projectPath, tempDirectory, "observe \"Puffin\" \"Iceland\"", url);
 
-        Process process = RunCli(projectPath, tempDirectory, "location \"Antarctica\"");
+        Process process = RunCli(projectPath, tempDirectory, "location \"Antarctica\"", url);
 
         string output = process.StandardOutput.ReadToEnd();
         string error = process.StandardError.ReadToEnd();
 
         Assert.True(process.ExitCode == 0,
             $"CLI failed.\nSTDOUT:\n{output}\nSTDERR:\n{error}");
-            
+
         if (server.HasExited)
         {
             string serverError = server.StandardError.ReadToEnd();
@@ -212,7 +226,7 @@ public class BisonCliE2ETests
         Directory.Delete(tempDirectory, true);
     }
 
-    private static Process RunCli(string projectPath, string workingDirectory, string arguments)
+    private static Process RunCli(string projectPath, string workingDirectory, string arguments, string url)
     {
         var process = new Process();
 
@@ -222,6 +236,7 @@ public class BisonCliE2ETests
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
         process.StartInfo.UseShellExecute = false;
+        process.StartInfo.EnvironmentVariables["BISON_SERVER_URL"] = url;
 
         process.Start();
 
@@ -229,12 +244,12 @@ public class BisonCliE2ETests
 
         return process;
     }
-    private static Process RunServer(string projectPath, string workingDirectory)
+    private static Process RunServer(string projectPath, string workingDirectory, string url)
     {
         var process = new Process();
 
         process.StartInfo.FileName = "dotnet";
-        process.StartInfo.Arguments = $"run --project \"{projectPath}\" --urls http://localhost:51234";
+        process.StartInfo.Arguments = $"run --project \"{projectPath}\" --urls {url}";
         process.StartInfo.WorkingDirectory = workingDirectory;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
@@ -267,4 +282,15 @@ public class BisonCliE2ETests
         }
         throw new Exception("Server never became available.");
     }
-}
+    private static int GetFreePort() {
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+
+        int port =
+            ((IPEndPoint)listener.LocalEndpoint).Port;
+
+        listener.Stop();
+
+        return port;
+    }
+} 
