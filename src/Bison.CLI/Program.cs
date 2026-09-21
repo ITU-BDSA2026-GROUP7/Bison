@@ -37,8 +37,12 @@ rootCommand.Subcommands.Add(commentCommand);
 rootCommand.Subcommands.Add(discussionCommand);
 rootCommand.Subcommands.Add(locationCommand);
 
-observeCommand.SetAction(async ParseResult =>
+
+observeCommand.SetAction(ParseResult =>
 {
+  
+    var taxonomy = TaxonomyLoader.Load();
+  
     string location = ParseResult.GetValue(locationArgument)!;
     string observation = ParseResult.GetValue(messageArgument)!;
     string author = Environment.UserName;
@@ -97,3 +101,9 @@ locationCommand.SetAction(async ParseResult =>
 });
 
 return rootCommand.Parse(args).Invoke();
+
+
+
+
+
+
