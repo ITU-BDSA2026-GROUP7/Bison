@@ -40,6 +40,7 @@ rootCommand.Subcommands.Add(locationCommand);
 var taxonomy = TaxonomyLoader.Load();
 
 observeCommand.SetAction(async ParseResult =>
+
 {
     string location = ParseResult.GetValue(locationArgument)!;
     string observation = ParseResult.GetValue(messageArgument)!;
@@ -99,3 +100,9 @@ locationCommand.SetAction(async ParseResult =>
 });
 
 return rootCommand.Parse(args).Invoke();
+
+
+
+
+
+
