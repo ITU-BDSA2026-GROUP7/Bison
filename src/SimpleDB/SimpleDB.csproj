@@ -13,4 +13,8 @@
     <InternalsVisibleTo Include="SimpleDB.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+  <EmbeddedResource Include="Taxons\joined.csv" LogicalName="SimpleDB.Taxons.joined.csv" />
+</ItemGroup>
+
 </Project>
