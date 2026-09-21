@@ -1,3 +1,5 @@
+namespace SimpleDB;
+
 using System.Reflection;
 
 public static class TaxonomyLoader{
