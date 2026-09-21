@@ -58,6 +58,27 @@ app.MapGet("/comments", (int observationId) =>
     return Results.Ok(commentDatabase.Read().Where(comment => comment.ObservationId == observationId));
 });
  
+app.MapPost("/proposal", (Proposal request) =>
+{
+    var result = proposalService.AddProposal(
+        request.ObservationId,
+        request.TaxonId,
+        request.Author,
+        request.Timestamp,
+        request.Location ?? string.Empty);
+
+    return result switch
+    {
+        ProposalResult.Stored => Results.Ok(),
+        ProposalResult.UnknownObservation => Results.BadRequest("Observation ID does not exist."),
+        _ => Results.BadRequest("Taxon ID does not exist.")
+    };
+});
+
+app.MapGet("/proposals", (int observationId) =>
+{
+    return Results.Ok(proposalService.GetProposals(observationId));
+});
 
 app.MapGet("/location", (string location) =>
 {
