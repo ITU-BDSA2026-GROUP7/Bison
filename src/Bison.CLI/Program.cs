@@ -37,6 +37,8 @@ rootCommand.Subcommands.Add(commentCommand);
 rootCommand.Subcommands.Add(discussionCommand);
 rootCommand.Subcommands.Add(locationCommand);
 
+var taxonomy = TaxonomyLoader.Load();
+
 observeCommand.SetAction(async ParseResult =>
 {
     string location = ParseResult.GetValue(locationArgument)!;
