@@ -1,15 +1,20 @@
 using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 
 public class BisonCliE2ETests
 {
     [Fact]
-    public void Observe_StoresObservationInDatabase()
+    public async Task Observe_StoresObservationInDatabase()
     {
         // Arrange
         string tempDirectory =
             Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
         Directory.CreateDirectory(tempDirectory);
+
+        string databasePath =
+            Path.Combine(tempDirectory, "bison_observe_cli_db.csv");
 
         var process = new Process();
 
@@ -29,29 +34,56 @@ public class BisonCliE2ETests
 
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
-        process.StartInfo.UseShellExecute = false;  
+        process.StartInfo.UseShellExecute = false;
+
+        string serverPath =
+            Path.GetFullPath(
+                Path.Combine(
+                    AppContext.BaseDirectory,
+                    "..", "..", "..", "..", "..",
+                    "src", "CSVDatabase.WebService"));
+        
+        int port = GetFreePort();
+        string url = $"http://localhost:{port}";
+
+        process.StartInfo.EnvironmentVariables["BISON_SERVER_URL"] = url;
 
         // Act
-        process.Start();
-        
-        process.WaitForExit();  
+        var server = RunServer(serverPath, tempDirectory, url);  
+        await WaitForServerAsync(url);
 
-        // Assert
-        string databasePath =
-            Path.Combine(tempDirectory, "bison_observe_cli_db.csv");
+        process.Start();
+
+        string processOutput = process.StandardOutput.ReadToEnd();
+        string processError = process.StandardError.ReadToEnd();
+
+        process.WaitForExit();
+
+        Assert.True(process.ExitCode == 0,
+            $"CLI failed.\nSTDOUT:\n{processOutput}\nSTDERR:\n{processError}");
+
+        if (server.HasExited)
+        {
+            string serverError = server.StandardError.ReadToEnd();
+
+            Assert.Fail(
+                $"Server exited unexpectedly.\nSTDERR:\n{serverError}");
+        }
 
         string databaseContents =
             File.ReadAllText(databasePath);
 
-    
         Assert.Contains("Penguin", databaseContents);
 
         // Clean up
+        server.Kill();
+        server.WaitForExit();
+
         Directory.Delete(tempDirectory, true);
     }
 
     [Fact]
-    public void Read_PrintsObservationsToConsole()
+    public async Task Read_PrintsObservationsToConsole()
     {
         // Arrange
         string tempDirectory =
@@ -87,30 +119,62 @@ public class BisonCliE2ETests
         process.StartInfo.RedirectStandardError = true;
         process.StartInfo.UseShellExecute = false;
 
+        string serverPath =
+            Path.GetFullPath(
+                Path.Combine(
+                    AppContext.BaseDirectory,
+                    "..", "..", "..", "..", "..",
+                    "src", "CSVDatabase.WebService"));
+
+        int port = GetFreePort();
+        string url = $"http://localhost:{port}";
+
+        process.StartInfo.EnvironmentVariables["BISON_SERVER_URL"] = url;
+
         // Act
+        var server = RunServer(serverPath, tempDirectory, url);
+        await WaitForServerAsync(url);
+
         process.Start();
 
-        string output = process.StandardOutput.ReadToEnd();
+        string processOutput = process.StandardOutput.ReadToEnd();
+        string processError = process.StandardError.ReadToEnd();
 
         process.WaitForExit();
 
-        // Assert
+        Assert.True(process.ExitCode == 0,
+            $"CLI failed.\nSTDOUT:\n{processOutput}\nSTDERR:\n{processError}");
+
+        if (server.HasExited)
+        {
+            string serverError = server.StandardError.ReadToEnd();
+
+            Assert.Fail(
+                $"Server exited unexpectedly.\nSTDERR:\n{serverError}");
+        }
+
         Assert.Contains(
             "Alice @ 09/06/24 12:30:00: Hello world",
-            output);
+            processOutput);
 
         // Clean up
+        server.Kill();
+        server.WaitForExit();
+
         Directory.Delete(tempDirectory, true);
     }
 
     [Fact]
-    public void Location_PrintsMatchingObservation()
+    public async Task Location_PrintsMatchingObservation()
     {
         // Arrange
         string tempDirectory =
             Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
         Directory.CreateDirectory(tempDirectory);
+
+        string databasePath =
+            Path.Combine(tempDirectory, "bison_observe_cli_db.csv");
 
         string projectPath =
             Path.GetFullPath(
@@ -119,21 +183,50 @@ public class BisonCliE2ETests
                     "..", "..", "..", "..", "..",
                     "src", "Bison.CLI"));
 
-        RunCli(projectPath, tempDirectory, "observe \"Penguin\" \"Antarctica\"");
-        RunCli(projectPath, tempDirectory, "observe \"Puffin\" \"Iceland\"");
+        string serverPath =
+            Path.GetFullPath(
+                Path.Combine(
+                    AppContext.BaseDirectory,
+                    "..", "..", "..", "..", "..",
+                    "src", "CSVDatabase.WebService"));
 
+        int port = GetFreePort();
+        string url = $"http://localhost:{port}";
+       
         // Act
-        string output = RunCli(projectPath, tempDirectory, "location \"Antarctica\"");
+        var server = RunServer(serverPath, tempDirectory, url);
+        await WaitForServerAsync(url);
 
-        // Assert
+        RunCli(projectPath, tempDirectory, "observe \"Penguin\" \"Antarctica\"", url);
+        RunCli(projectPath, tempDirectory, "observe \"Puffin\" \"Iceland\"", url);
+
+        Process process = RunCli(projectPath, tempDirectory, "location \"Antarctica\"", url);
+
+        string output = process.StandardOutput.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
+
+        Assert.True(process.ExitCode == 0,
+            $"CLI failed.\nSTDOUT:\n{output}\nSTDERR:\n{error}");
+
+        if (server.HasExited)
+        {
+            string serverError = server.StandardError.ReadToEnd();
+
+            Assert.Fail(
+                $"Server exited unexpectedly.\nSTDERR:\n{serverError}");
+        }
+
         Assert.Contains("Penguin", output);
         Assert.DoesNotContain("Puffin", output);
 
         // Clean up
+        server.Kill();
+        server.WaitForExit();
+
         Directory.Delete(tempDirectory, true);
     }
 
-    private static string RunCli(string projectPath, string workingDirectory, string arguments)
+    private static Process RunCli(string projectPath, string workingDirectory, string arguments, string url)
     {
         var process = new Process();
 
@@ -143,13 +236,61 @@ public class BisonCliE2ETests
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
         process.StartInfo.UseShellExecute = false;
+        process.StartInfo.EnvironmentVariables["BISON_SERVER_URL"] = url;
 
         process.Start();
 
-        string output = process.StandardOutput.ReadToEnd();
-
         process.WaitForExit();
 
-        return output;
+        return process;
     }
-}
+    private static Process RunServer(string projectPath, string workingDirectory, string url)
+    {
+        var process = new Process();
+
+        process.StartInfo.FileName = "dotnet";
+        process.StartInfo.Arguments = $"run --project \"{projectPath}\" --urls {url}";
+        process.StartInfo.WorkingDirectory = workingDirectory;
+        process.StartInfo.RedirectStandardOutput = true;
+        process.StartInfo.RedirectStandardError = true;
+        process.StartInfo.UseShellExecute = false;
+        process.StartInfo.EnvironmentVariables["OBSERVE_FILE"] = Path.Combine(workingDirectory, "bison_observe_cli_db.csv");
+        process.StartInfo.EnvironmentVariables["COMMENT_FILE"] = Path.Combine(workingDirectory, "bison_comment.csv");
+
+        process.Start();
+
+        return process;
+    }
+    private static async Task WaitForServerAsync(string url) {
+        using var client = new HttpClient();
+        for (int i = 0; i < 30; i++)
+        {
+            try
+            {
+                var response =
+                    await client.GetAsync(
+                        url + "/observations");
+
+                if (response.IsSuccessStatusCode)
+                    return;
+            }
+            catch
+            {
+            }
+
+        await Task.Delay(1000);
+        }
+        throw new Exception("Server never became available.");
+    }
+    private static int GetFreePort() {
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+
+        int port =
+            ((IPEndPoint)listener.LocalEndpoint).Port;
+
+        listener.Stop();
+
+        return port;
+    }
+} 
