@@ -10,7 +10,7 @@ public static class TaxonomyLoader{
 
         var assembly = Assembly.GetExecutingAssembly();
 
-        using var stream = assembly.GetManifestResourceStream("Bison.CLI.Taxons.joined.csv");
+        using var stream = assembly.GetManifestResourceStream("SimpleDB.Taxons.joined.csv");
 
         using var reader = new StreamReader(stream!);
 

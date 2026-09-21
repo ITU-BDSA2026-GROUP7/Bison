@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using static UserInterface;
+using SimpleDB;
 
 string baseUrl =
     Environment.GetEnvironmentVariable("BISON_SERVER_URL")
