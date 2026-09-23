@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http.Json;
 using System.Net.Sockets;
 
 public class BisonCliE2ETests
@@ -249,13 +250,19 @@ public class BisonCliE2ETests
         var process = new Process();
 
         process.StartInfo.FileName = "dotnet";
-        process.StartInfo.Arguments = $"run --project \"{projectPath}\" --urls {url}";
+        process.StartInfo.Arguments = $"run --project \"{projectPath}\" --no-launch-profile --urls {url}";
         process.StartInfo.WorkingDirectory = workingDirectory;
-        process.StartInfo.RedirectStandardOutput = true;
-        process.StartInfo.RedirectStandardError = true;
+        process.StartInfo.RedirectStandardOutput = false;
+        process.StartInfo.RedirectStandardError = false;
         process.StartInfo.UseShellExecute = false;
-        process.StartInfo.EnvironmentVariables["OBSERVE_FILE"] = Path.Combine(workingDirectory, "bison_observe_cli_db.csv");
-        process.StartInfo.EnvironmentVariables["COMMENT_FILE"] = Path.Combine(workingDirectory, "bison_comment.csv");
+        process.StartInfo.EnvironmentVariables["OBSERVE_FILE"] =
+            Path.Combine(workingDirectory, "bison_observe_cli_db.csv");
+
+        process.StartInfo.EnvironmentVariables["COMMENT_FILE"] =
+            Path.Combine(workingDirectory, "bison_comment.csv");
+
+        process.StartInfo.EnvironmentVariables["PROPOSAL_FILE"] =
+            Path.Combine(workingDirectory, "bison_proposal.csv");
 
         process.Start();
 
@@ -293,4 +300,280 @@ public class BisonCliE2ETests
 
         return port;
     }
-} 
+
+    [Fact]
+public async Task Fuzz_PostEndpoints()
+{
+    // Arrange
+    string tempDirectory =
+        Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+    Directory.CreateDirectory(tempDirectory);
+
+    string serverPath =
+        Path.GetFullPath(
+            Path.Combine(
+                AppContext.BaseDirectory,
+                "..", "..", "..", "..", "..",
+                "src", "CSVDatabase.WebService"));
+
+    int port = GetFreePort();
+    string url = $"http://localhost:{port}";
+
+    var server = RunServer(serverPath, tempDirectory, url);
+
+    try
+    {
+        await WaitForServerAsync(url);
+
+        var random = new Random(12345);
+
+        var expectedObservations = new List<ObservationDto>();
+        var expectedComments = new List<CommentDto>();
+        var expectedProposals = new List<ProposalDto>();
+
+        using var client = new HttpClient
+        {
+            BaseAddress = new Uri(url)
+        };
+
+        string taxonomyPath =
+            Path.GetFullPath(
+                Path.Combine(
+                    AppContext.BaseDirectory,
+                    "..", "..", "..", "..", "..",
+                    "src", "SimpleDB", "Taxons", "joined.csv"));
+
+        var taxonIds =
+            File.ReadLines(taxonomyPath)
+            .Skip(1)
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .Select(line => line.Split(',')[0])
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .ToList();
+
+        Assert.NotEmpty(taxonIds);
+
+        // Generate observations
+        for (int i = 0; i < 100; i++)
+        {
+            var observation = new
+            {
+                Author = $"User{random.Next(1, 10)}",
+                Message = $"Observation {i}",
+                Timestamp = random.NextInt64(1_700_000_000, 1_800_000_000),
+                Location = $"Location{random.Next(1, 10)}"
+            };
+
+            expectedObservations.Add(
+                new ObservationDto(
+                    i + 1,
+                    observation.Author,
+                    observation.Message,
+                    observation.Timestamp,
+                    observation.Location));
+
+            var response =
+                await client.PostAsJsonAsync("/observation", observation);
+
+            string responseBody =
+                await response.Content.ReadAsStringAsync();
+
+            Assert.True(
+                response.IsSuccessStatusCode,
+                $"Observation {i} failed: " +
+                $"{(int)response.StatusCode} {response.StatusCode}.\n" +
+                $"Response body: {responseBody}");
+        }
+
+        // Generate comments
+        for (int i = 0; i < 100; i++)
+        {
+            bool useValidObservation = random.Next(100) < 90;
+
+            int observationId = useValidObservation
+                ? random.Next(1, expectedObservations.Count + 1)
+                : expectedObservations.Count + random.Next(1, 100);
+
+            var comment = new
+            {
+                Author = $"User{random.Next(1, 10)}",
+                Message = $"Comment {i}",
+                Timestamp = random.NextInt64(1_700_000_000, 1_800_000_000),
+                ObservationId = observationId,
+                Location = $"Location{random.Next(1, 10)}"
+            };
+
+            var response =
+                await client.PostAsJsonAsync("/comment", comment);
+
+            if (useValidObservation)
+            {
+                string responseBody =
+                    await response.Content.ReadAsStringAsync();
+
+                Assert.True(
+                    response.IsSuccessStatusCode,
+                    $"Comment {i} failed: " +
+                    $"{(int)response.StatusCode} {response.StatusCode}.\n" +
+                    $"Response body: {responseBody}");
+
+                expectedComments.Add(
+                    new CommentDto(
+                        expectedComments.Count + 1,
+                        comment.Author,
+                        comment.Message,
+                        comment.Timestamp,
+                        comment.ObservationId,
+                        comment.Location));
+            }
+            else
+            {
+                Assert.Equal(
+                    HttpStatusCode.BadRequest,
+                    response.StatusCode);
+            }
+        }
+
+        // Generate proposals
+        for (int i = 0; i < 100; i++)
+        {
+            bool useValidObservation = random.Next(100) < 90;
+            bool useValidTaxon = random.Next(100) < 90;
+
+            int observationId = useValidObservation
+                ? random.Next(1, expectedObservations.Count + 1)
+                : expectedObservations.Count + random.Next(1, 100);
+
+            string taxonId = useValidTaxon
+                ? taxonIds[random.Next(taxonIds.Count)]
+                : $"invalid-{i}";
+
+            var proposal = new
+            {
+                Author = $"User{random.Next(1, 10)}",
+                TaxonId = taxonId,
+                Timestamp = random.NextInt64(1_700_000_000, 1_800_000_000),
+                ObservationId = observationId,
+                Location = $"Location{random.Next(1, 10)}"
+            };
+
+            var response =
+                await client.PostAsJsonAsync("/proposal", proposal);
+
+            if (useValidObservation && useValidTaxon)
+            {
+                string responseBody =
+                    await response.Content.ReadAsStringAsync();
+
+                Assert.True(
+                    response.IsSuccessStatusCode,
+                    $"Proposal {i} failed: " +
+                    $"{(int)response.StatusCode} {response.StatusCode}.\n" +
+                    $"Response body: {responseBody}");
+
+            expectedProposals.Add(
+                new ProposalDto(
+                    expectedProposals.Count + 1,
+                    proposal.Author,
+                    proposal.TaxonId,
+                    proposal.Timestamp,
+                    proposal.ObservationId,
+                    proposal.Location));
+        }
+        else
+        {
+            Assert.Equal(
+                HttpStatusCode.BadRequest,
+                response.StatusCode);
+        }
+    }
+
+
+        // Verify observations
+        var actualObservations =
+            await client.GetFromJsonAsync<List<ObservationDto>>(
+                "/observations");
+
+        Assert.NotNull(actualObservations);
+
+        Assert.Equal(
+            expectedObservations,
+            actualObservations);
+
+        // Verify comments
+        foreach (var observation in expectedObservations)
+        {
+            var actualComments =
+                await client.GetFromJsonAsync<List<CommentDto>>(
+                    $"/comments?observationId={observation.Id}");
+
+            Assert.NotNull(actualComments);
+
+            var expectedForObservation =
+                expectedComments
+                    .Where(c => c.ObservationId == observation.Id)
+                    .ToList();
+
+            Assert.Equal(
+                expectedForObservation,
+                actualComments);
+        }
+
+        // Verify proposals
+        foreach (var observation in expectedObservations)
+        {
+            var actualProposals =
+                await client.GetFromJsonAsync<List<ProposalDto>>(
+                    $"/proposals?observationId={observation.Id}");
+
+            Assert.NotNull(actualProposals);
+
+            var expectedForObservation =
+                expectedProposals
+                    .Where(p => p.ObservationId == observation.Id)
+                    .ToList();
+
+            Assert.Equal(
+                expectedForObservation,
+                actualProposals);
+        }
+
+        
+    }
+    finally
+    {
+        if (!server.HasExited)
+        {
+            server.Kill(entireProcessTree: true);
+            await server.WaitForExitAsync();
+        }
+
+        Directory.Delete(tempDirectory, true);
+    }
+}
+
+    private record ObservationDto(
+    int Id,
+    string Author,
+    string Message,
+    long Timestamp,
+    string Location);
+
+    private record CommentDto(
+    int Id,
+    string Author,
+    string Message,
+    long Timestamp,
+    int ObservationId,
+    string Location);
+
+    private record ProposalDto(
+    int Id,
+    string Author,
+    string TaxonId,
+    long Timestamp,
+    int ObservationId,
+    string Location);
+
+}
