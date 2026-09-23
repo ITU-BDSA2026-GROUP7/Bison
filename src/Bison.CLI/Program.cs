@@ -2,7 +2,6 @@ using System.Net.Http.Json;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using static UserInterface;
-using SimpleDB;
 
 string baseUrl =
     Environment.GetEnvironmentVariable("BISON_SERVER_URL")
@@ -37,8 +36,6 @@ rootCommand.Subcommands.Add(readCommand);
 rootCommand.Subcommands.Add(commentCommand);
 rootCommand.Subcommands.Add(discussionCommand);
 rootCommand.Subcommands.Add(locationCommand);
-
-var taxonomy = TaxonomyLoader.Load();
 
 observeCommand.SetAction(async ParseResult =>
 
