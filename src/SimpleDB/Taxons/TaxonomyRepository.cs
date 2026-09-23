@@ -1,3 +1,5 @@
+namespace SimpleDB;
+
 public class TaxonomyRepository{
     //readonly makes objects more immutable by ensuring certain values never change af construction
     private readonly Dictionary<string, Taxon> taxonsById = new();
@@ -8,7 +10,11 @@ public class TaxonomyRepository{
 
     }
 
-    public Taxon? GetById(string taxonId){
+    public Taxon? GetById(string? taxonId){
+        if (string.IsNullOrEmpty(taxonId)) {
+            return null;
+        }
+
         taxonsById.TryGetValue(taxonId, out var taxon);
         return taxon;
     }
@@ -19,6 +25,8 @@ public class TaxonomyRepository{
              && t.VernacularName.Equals(name, StringComparison.OrdinalIgnoreCase));
 
     }
+
+    public bool Contains(string? taxonId) => GetById(taxonId) is not null;
 
     public Taxon? GetParent(string taxonId){
         var taxon = GetById(taxonId);
