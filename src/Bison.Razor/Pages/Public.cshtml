@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/obs"
 @model Bison.Razor.Pages.PublicModel
 @{
     ViewData["Title"] = "Bison";
@@ -16,7 +16,7 @@
                 <li>
                     <p>
                         <strong>
-                            <a href="/@obs.Author">@obs.Author</a>
+                            <a href="/obs/@obs.Author">@obs.Author</a>
                         </strong>
                         @obs.Message
                         <small>&mdash; @obs.Timestamp</small>
@@ -29,4 +29,21 @@
     {
         <em>There are no observations so far.</em>
     }
+    <div>
+    @if (Model.CurrentPage > 1)
+    {
+        <a href="/obs?page=@(Model.CurrentPage - 1)">
+            Previous
+        </a>
+    }
+
+    <span> Page @Model.CurrentPage </span>
+
+    @if (Model.HasNextPage)
+    {
+        <a href="/obs?page=@(Model.CurrentPage + 1)">
+            Next
+        </a>
+    }
+    </div>
 </div>
