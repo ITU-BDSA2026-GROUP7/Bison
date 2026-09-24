@@ -30,9 +30,11 @@ app.MapPost("/observation", (Cheep request) =>
     return Results.Ok();
 });
 
-app.MapGet("/observations", () => 
+app.MapGet("/observations/{observationId?}", (int? observationId) => 
 {
-    return Results.Ok(database.Read());
+    if (observationId is null) 
+        return Results.Ok(database.Read());
+    return Results.Ok(database.Read().Where(cheep => cheep.Id == observationId.Value));
 });
     
 app.MapPost("/comment", (Comment request) =>
