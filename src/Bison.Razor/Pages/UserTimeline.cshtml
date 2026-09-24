@@ -1,4 +1,4 @@
-﻿@page "/{author}"
+﻿@page "/obs/{author}"
 @model Bison.Razor.Pages.UserTimelineModel
 @{
     ViewData["Title"] = "Bison";
@@ -17,7 +17,7 @@
                 <li>
                     <p>
                         <strong>
-                            <a href="/@ob.Author">@ob.Author</a>
+                            <a href="/obs/@ob.Author">@ob.Author</a>
                         </strong>
                         @ob.Message
                         <small>&mdash; @ob.Timestamp</small>
@@ -30,4 +30,21 @@
     {
         <em>There are no Observations so far.</em>
     }
+    <div>
+    @if (Model.CurrentPage > 1)
+    {
+        <a href="/obs/@routeName?page=@(Model.CurrentPage - 1)">
+            Previous
+        </a>
+    }
+
+    <span> Page @Model.CurrentPage </span>
+
+    @if (Model.HasNextPage)
+    {
+        <a href="/obs/@routeName?page=@(Model.CurrentPage + 1)">
+            Next
+        </a>
+    }
+    </div>
 </div>
