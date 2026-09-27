@@ -8,6 +8,8 @@ var dbPath = Environment.GetEnvironmentVariable("BISONDBPATH")
 
 builder.Services.AddSingleton(new DBFacade(dbPath));
 builder.Services.AddSingleton<IObservationService, ObservationService>();
+builder.Services.AddSingleton<ICommentService, CommentService>();
+builder.Services.AddSingleton<IProposalService, ProposalService>();
 
 
 var app = builder.Build();

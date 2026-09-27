@@ -1,0 +1,70 @@
+@page "/ob/{id}"
+@model Bison.Razor.Pages.ObservationDetailsModel
+@{
+    ViewData["Title"] = "Observation";
+    Layout = "Shared/_Layout";
+}
+
+<div>
+    <h2>Observation</h2>
+
+    @if (Model.Details is not null)
+    {
+        <div class="observationbox">
+            <p>
+                <strong>
+                    <a href="/obs/@Model.Details.Observation.Author">@Model.Details.Observation.Author</a>
+                </strong>
+                @Model.Details.Observation.Message
+                <small>&mdash; @Model.Details.Observation.Timestamp</small>
+            </p>
+        </div>
+
+        <h3>Comments</h3>
+        @if (Model.Details.Comments.Observations.Any())
+        {
+            <ul id="messagelist" class="observations">
+                @foreach (var comment in Model.Details.Comments.Observations)
+                {
+                    <li>
+                        <p>
+                            <strong>@comment.Author</strong>
+                            @comment.Message
+                            <small>&mdash; @comment.Timestamp</small>
+                        </p>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <em>There are no comments so far.</em>
+        }
+
+        <h3>Proposals</h3>
+        @if (Model.Details.Proposals.Observations.Any())
+        {
+            <ul id="messagelist" class="observations">
+                @foreach (var proposal in Model.Details.Proposals.Observations)
+                {
+                    <li>
+                        <p>
+                            <strong>@proposal.Author</strong>
+                            @proposal.Message
+                            <small>&mdash; @proposal.Timestamp</small>
+                        </p>
+                        <p>Taxon: @proposal.TaxonId</p>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <em>There are no proposals so far.</em>
+        }
+    }
+    else
+    {
+        <em>Observation not found.</em>
+    }
+</div>
