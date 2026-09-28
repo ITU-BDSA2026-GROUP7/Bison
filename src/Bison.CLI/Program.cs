@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using static UserInterface;
 using SimpleDB;
 
@@ -16,6 +15,7 @@ var taxonomy = TaxonomyLoader.Load();
 var locationArgument = new Argument<string>("location");
 var messageArgument = new Argument<string>("message");
 var idArgument = new Argument<int>("id");
+var optionalIdArgument = new Argument<int?>("id");
 var taxonArgument = new Argument<string>("taxon");
 
 var observeCommand = new Command("observe", "add a new observation");
@@ -23,6 +23,7 @@ observeCommand.Arguments.Add(messageArgument);
 observeCommand.Arguments.Add(locationArgument);
 
 var readCommand = new Command("read", "show all observations");
+readCommand.Arguments.Add(optionalIdArgument);
 
 var commentCommand = new Command("comment", "add a comment to an observation");
 commentCommand.Arguments.Add(idArgument);
@@ -67,11 +68,22 @@ observeCommand.SetAction(async ParseResult =>
 
 readCommand.SetAction(async ParseResult =>
 {
-    var observations = await client.GetFromJsonAsync<List<ObservationRequest>>(
-    $"/observations");
+    int? observationId = ParseResult.GetValue(optionalIdArgument);
+    if (observationId is null)
+    {
+        var observations = await client.GetFromJsonAsync<List<ObservationRequest>>(
+        $"/observations");
+        PrintCheeps(observations!);
+        return 0; 
+    }
+    var observation = await client.GetFromJsonAsync<List<ObservationRequest>>(
+    $"/observations/{observationId}");
+    var comments = await client.GetFromJsonAsync<List<CommentRequest>>(
+    $"/comments?observationId={observationId}");
+    var proposals = await client.GetFromJsonAsync<List<ProposalRequest>>(
+    $"/proposals?observationId={observationId}");
 
-    PrintCheeps(observations!);
-
+    PrintObservationDetails(observation!,comments!,proposals!,taxonomy,observationId);
     return 0;
 });
 

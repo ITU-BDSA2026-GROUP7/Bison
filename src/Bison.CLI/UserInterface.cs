@@ -49,6 +49,27 @@ public static class UserInterface
         Console.WriteLine(output);
     }
 }
+    public static void PrintObservationDetails(IEnumerable<ObservationRequest> observation,IEnumerable<CommentRequest> comments,IEnumerable<ProposalRequest> proposals, TaxonomyRepository taxonomy, int? id)
+    {
+        ObservationRequest? ob = observation.FirstOrDefault();
+        if (ob is null)
+            return;
+
+        Console.WriteLine($"Observation {id}");
+        Console.WriteLine("-------------");
+        Console.WriteLine($"Author: {ob.Author}");
+        Console.WriteLine($"Message: {ob.Message}");
+        Console.WriteLine();
+
+        Console.WriteLine("Comments");
+        Console.WriteLine("--------");
+        PrintComments(comments);
+        Console.WriteLine();
+
+        Console.WriteLine("Proposals");
+        Console.WriteLine("---------");
+        PrintProposals(proposals,taxonomy);
+    }
 }
 
 public record ObservationRequest(string Author, string Message, long Timestamp, string? Location = null);

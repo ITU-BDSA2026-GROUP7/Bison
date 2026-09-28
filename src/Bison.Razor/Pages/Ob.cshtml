@@ -1,0 +1,12 @@
+@page "/ob"
+@model Bison.Razor.Pages.PublicModel
+@{
+    ViewData["Title"] = "Bison";
+    Layout = "Shared/_Layout";
+}
+
+@{
+    var currentPage = Request.Query["page"].ToString();
+    var target = string.IsNullOrWhiteSpace(currentPage) ? "/obs" : "/obs?page=" + currentPage;
+    Response.Redirect(target);
+}
