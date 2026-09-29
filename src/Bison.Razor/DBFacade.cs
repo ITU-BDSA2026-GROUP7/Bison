@@ -6,6 +6,7 @@ public class DBFacade
 
     public DBFacade(string dbFilePath)
     {
+        Console.WriteLine($"Opening SQLite file: {dbFilePath}");
         _connectionString = $"Data Source={dbFilePath}";
     }
 
