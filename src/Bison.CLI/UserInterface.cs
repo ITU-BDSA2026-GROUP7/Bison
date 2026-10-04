@@ -11,7 +11,7 @@ public static class UserInterface
 
             string output =
                 cheep.Author + " @ " +
-                dateTime.ToString("MM/dd/yy HH':'mm':'ss", CultureInfo.InstalledUICulture) +
+                dateTime.ToString("MM/dd/yy HH':'mm':'ss", CultureInfo.InvariantCulture) +
                 ": " + cheep.Message;
 
             Console.WriteLine(output);
@@ -27,7 +27,7 @@ public static class UserInterface
 
             string output =
                 comment.Author + " @ " +
-                dateTime.ToString("MM/dd/yy HH':'mm':'ss", CultureInfo.InstalledUICulture) +
+                dateTime.ToString("MM/dd/yy HH':'mm':'ss", CultureInfo.InvariantCulture) +
                 ": " + comment.Message;
 
             Console.WriteLine(output);
@@ -44,7 +44,7 @@ public static class UserInterface
 
         string output =
             proposal.Author + " @ " +
-            dateTime.ToString("MM/dd/yy HH':'mm':'ss", CultureInfo.InstalledUICulture) +
+            dateTime.ToString("MM/dd/yy HH':'mm':'ss", CultureInfo.InvariantCulture) +
             ": " + name;
 
         Console.WriteLine(output);
