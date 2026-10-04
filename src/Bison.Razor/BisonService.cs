@@ -1,3 +1,5 @@
+using Bizon.Razor.Repositories;
+
 public record ObservationViewModel(int Id, string Author, string Message, string Timestamp);
 
 public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp);
