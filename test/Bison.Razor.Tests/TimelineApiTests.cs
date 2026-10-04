@@ -38,7 +38,6 @@ public class TimelineApiTest : IClassFixture<WebApplicationFactory<Program>>
 
         Console.WriteLine(html);
 
-        Console.WriteLine(await response.Content.ReadAsStringAsync());
         Assert.True(response.IsSuccessStatusCode);
     }
 
@@ -67,7 +66,6 @@ public class TimelineApiTest : IClassFixture<WebApplicationFactory<Program>>
 
         Console.WriteLine(html);
 
-        Console.WriteLine(await response.Content.ReadAsStringAsync());
         Assert.True(response.IsSuccessStatusCode);
     }
 }
