@@ -5,6 +5,8 @@ builder.Services.AddRazorPages();
 
 var dbPath = Environment.GetEnvironmentVariable("BISONDBPATH")
     ?? Path.Combine(Path.GetTempPath(), "bison.db");
+ 
+builder.Services.AddSingleton(new DBFacade(dbPath));
 
 builder.Services.AddSingleton(new DBFacade(dbPath));
 builder.Services.AddSingleton<IObservationService, ObservationService>();
@@ -30,3 +32,10 @@ app.UseRouting();
 app.MapRazorPages();
 
 app.Run();
+
+public partial class Program
+{
+    
+
+    
+}
