@@ -7,18 +7,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-var dbPath = Environment.GetEnvironmentVariable("BISONDBPATH")
-    ?? Path.Combine(Path.GetTempPath(), "bison.db");
-
-builder.Services.AddSingleton(new DBFacade(dbPath));
-builder.Services.AddSingleton<IObservationService, ObservationService>();
-builder.Services.AddSingleton<ICommentService, CommentService>();
-builder.Services.AddSingleton<IProposalService, ProposalService>();
 
 var efDbPath = Environment.GetEnvironmentVariable("BISON_EF_DBPATH")
     ?? Path.Combine(Path.GetTempPath(), "bison-ef.db");
 builder.Services.AddDbContext<BisonDBContext>(options =>
     options.UseSqlite($"Data Source={efDbPath}"));
+
+
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<IObservationService, ObservationService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IProposalService, ProposalService>();
+
 
 var app = builder.Build();
 
