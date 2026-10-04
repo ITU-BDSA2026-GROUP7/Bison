@@ -1,5 +1,4 @@
 using SimpleDB;
-using System.Globalization;
 public static class UserInterface
 {
     public static void PrintCheeps(IEnumerable<ObservationRequest> cheeps)
@@ -11,7 +10,7 @@ public static class UserInterface
 
             string output =
                 cheep.Author + " @ " +
-                dateTime.ToString("MM/dd/yy HH':'mm':'ss", CultureInfo.InvariantCulture) +
+                dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
                 ": " + cheep.Message;
 
             Console.WriteLine(output);
@@ -27,7 +26,7 @@ public static class UserInterface
 
             string output =
                 comment.Author + " @ " +
-                dateTime.ToString("MM/dd/yy HH':'mm':'ss", CultureInfo.InvariantCulture) +
+                dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
                 ": " + comment.Message;
 
             Console.WriteLine(output);
@@ -44,7 +43,7 @@ public static class UserInterface
 
         string output =
             proposal.Author + " @ " +
-            dateTime.ToString("MM/dd/yy HH':'mm':'ss", CultureInfo.InvariantCulture) +
+            dateTime.ToString("MM/dd/yy HH':'mm':'ss") +
             ": " + name;
 
         Console.WriteLine(output);
