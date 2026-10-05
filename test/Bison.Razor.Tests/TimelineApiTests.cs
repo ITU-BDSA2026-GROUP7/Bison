@@ -31,7 +31,6 @@ public class TimelineApiTests
         await using (var scope = factory.Services.CreateAsyncScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<BisonDBContext>();
-            await dbContext.Database.EnsureCreatedAsync();
             dbContext.Observations.Add(new Observation
             {
                 Text = observationText,
@@ -74,7 +73,6 @@ public class TimelineApiTests
         await using (var scope = factory.Services.CreateAsyncScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<BisonDBContext>();
-            await dbContext.Database.EnsureCreatedAsync();
             dbContext.Observations.AddRange(
                 new Observation
                 {
