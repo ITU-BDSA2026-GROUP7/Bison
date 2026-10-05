@@ -1,47 +1,103 @@
+using Bison.Razor.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using Xunit;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
-public class TimelineApiTest : IClassFixture<WebApplicationFactory<Program>>
+public class TimelineApiTests
 {
-    private readonly WebApplicationFactory<Program> _factory;
-
-    public TimelineApiTest(WebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-    }
-
     [Fact]
-    public async Task PublicTimelineContainsPetersObservation()
+    public async Task PublicTimelineDisplaysAnObservationFromTheDatabase()
     {
-        var client = _factory.CreateClient();
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        using var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    services.RemoveAll<DbContextOptions<BisonDBContext>>();
+                    services.AddDbContext<BisonDBContext>(options => options.UseSqlite(connection));
+                });
+            });
+
+        using var client = factory.CreateClient();
+        var authorName = $"Test author {Guid.NewGuid():N}";
+        var observationText = $"Test observation {Guid.NewGuid():N}";
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<BisonDBContext>();
+            await dbContext.Database.EnsureCreatedAsync();
+            dbContext.Observations.Add(new Observation
+            {
+                Text = observationText,
+                TimeStamp = DateTime.UtcNow,
+                Author = new Author { Name = authorName }
+            });
+            await dbContext.SaveChangesAsync();
+        }
 
         var response = await client.GetAsync("/obs");
 
         response.EnsureSuccessStatusCode();
-
         var html = await response.Content.ReadAsStringAsync();
 
-
-        Assert.Contains("Peter", html);
-        Assert.Contains("A big bird", html);
+        Assert.Contains(authorName, html);
+        Assert.Contains(observationText, html);
     }
-
 
     [Fact]
-    public async Task PetraTimelineContainsHerObservation()
+    public async Task PrivateTimelineDisplaysOnlyObservationsFromTheRequestedAuthor()
     {
-    var client = _factory.CreateClient();
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
 
-    var response = await client.GetAsync("/obs/Eduard");
+        using var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    services.RemoveAll<DbContextOptions<BisonDBContext>>();
+                    services.AddDbContext<BisonDBContext>(options => options.UseSqlite(connection));
+                });
+            });
 
-    response.EnsureSuccessStatusCode();
+        using var client = factory.CreateClient();
+        var authorName = $"Test author {Guid.NewGuid():N}";
+        var observationText = $"Private timeline observation {Guid.NewGuid():N}";
+        var otherObservationText = $"Other author's observation {Guid.NewGuid():N}";
 
-    var html = await response.Content.ReadAsStringAsync();
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<BisonDBContext>();
+            await dbContext.Database.EnsureCreatedAsync();
+            dbContext.Observations.AddRange(
+                new Observation
+                {
+                    Text = observationText,
+                    TimeStamp = DateTime.UtcNow,
+                    Author = new Author { Name = authorName }
+                },
+                new Observation
+                {
+                    Text = otherObservationText,
+                    TimeStamp = DateTime.UtcNow,
+                    Author = new Author { Name = $"Other author {Guid.NewGuid():N}" }
+                });
+            await dbContext.SaveChangesAsync();
+        }
 
-    Assert.Contains("Eduard", html);
-    Assert.Contains("A heron", html);
+        var response = await client.GetAsync($"/obs/{Uri.EscapeDataString(authorName)}");
 
+        response.EnsureSuccessStatusCode();
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Contains(authorName, html);
+        Assert.Contains(observationText, html);
+        Assert.DoesNotContain(otherObservationText, html);
     }
 }
-
