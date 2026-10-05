@@ -67,10 +67,10 @@ public class DBFacade
         var dumpSql = File.ReadAllText(dumpPath);
 
         using var command = connection.CreateCommand();
-        command.CommandText = schemaPath;
+        command.CommandText = schemaSql;
         command.ExecuteNonQuery();
 
-        command.CommandText = dumpPath;
+        command.CommandText = dumpSql;
         command.ExecuteNonQuery();
     }
 
