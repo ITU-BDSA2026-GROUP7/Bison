@@ -7,6 +7,11 @@ public class DBFacade
     public DBFacade(string dbFilePath)
     {
         Console.WriteLine($"Opening SQLite file: {dbFilePath}");
+        if (!File.Exists(dbFilePath))
+        {
+            initializeDataBase(dbFilePath);
+        }
+
         _connectionString = $"Data Source={dbFilePath}";
     }
 
@@ -41,4 +46,32 @@ public class DBFacade
 
         return results;
     }
+    private static void initializeDataBase(string dbFilePath)
+    {
+        using var connection = new SqliteConnection($"Data Source ={dbFilePath}");
+        connection.Open();
+
+        var schemaPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "data",
+            "schema.sql"
+        );
+ 
+        var dumpPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "data",
+            "dump.sql"
+        );
+
+        var schemaSql = File.ReadAllText(schemaPath);
+        var dumpSql = File.ReadAllText(dumpPath);
+
+        using var command = connection.CreateCommand();
+        command.CommandText = schemaSql;
+        command.ExecuteNonQuery();
+
+        command.CommandText = dumpSql;
+        command.ExecuteNonQuery();
+    }
+
 }
