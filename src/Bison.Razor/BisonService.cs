@@ -1,3 +1,6 @@
+using Bison.Razor.Models;
+using Bison.Razor.Repositories;
+
 public record ObservationViewModel(int Id, string Author, string Message, string Timestamp);
 
 public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp);
@@ -33,30 +36,17 @@ public class ObservationService : IObservationService
 {
     private const int PageSize = 32;
 
-    private readonly DBFacade _db;
+    private readonly IPostRepository _repository;
 
-    public ObservationService(DBFacade db)
+    public ObservationService(IPostRepository repository)
     {
-        _db = db;
+        _repository = repository;
     }
 
     public ObservationPage GetObservations(int page)
     {
-        const string sql = @"
-            SELECT o.observation_id AS observation_id,
-                   u.username AS author, o.text AS message, o.pub_date AS pub_date
-            FROM observation o
-            JOIN user u ON o.author_id = u.user_id
-            ORDER BY o.pub_date DESC
-            LIMIT @pageSize OFFSET @offset";
-
-        var parameters = new Dictionary<string, object>
-        {
-            { "@pageSize", PageSize + 1 },
-            { "@offset", (page - 1) * PageSize }
-        };
-
-        var rows = _db.Query(sql, parameters);
+        // Ask for one extra row to find out whether there is a next page.
+        var rows = _repository.GetObservations((page - 1) * PageSize, PageSize + 1);
 
         var hasNextPage = rows.Count > PageSize;
 
@@ -70,23 +60,7 @@ public class ObservationService : IObservationService
 
     public ObservationPage GetObservationsFromAuthor(string author, int page)
     {
-        const string sql = @"
-            SELECT o.observation_id AS observation_id,
-                   u.username AS author, o.text AS message, o.pub_date AS pub_date
-            FROM observation o
-            JOIN user u ON o.author_id = u.user_id
-            WHERE u.username = @author
-            ORDER BY o.pub_date DESC
-            LIMIT @pageSize OFFSET @offset";
-
-        var parameters = new Dictionary<string, object>
-        {
-            { "@author", author },
-            { "@pageSize", PageSize + 1 },
-            { "@offset", (page - 1) * PageSize }
-        };
-
-        var rows = _db.Query(sql, parameters);
+        var rows = _repository.GetObservationsFromAuthor(author, (page - 1) * PageSize, PageSize + 1);
 
         var hasNextPage = rows.Count > PageSize;
 
@@ -100,36 +74,19 @@ public class ObservationService : IObservationService
 
     public ObservationViewModel? GetObservation(int id)
     {
-        const string sql = @"
-            SELECT o.observation_id AS observation_id,
-                   u.username AS author, o.text AS message, o.pub_date AS pub_date
-            FROM observation o
-            JOIN user u ON o.author_id = u.user_id
-            WHERE o.observation_id = @id";
+        var observation = _repository.GetObservation(id);
 
-        var parameters = new Dictionary<string, object>
-        {
-            { "@id", id },
-        };
-
-        var row = _db.Query(sql, parameters);
-
-        var observation = row
-            .Select(ToViewModel);
-            
-        return observation.FirstOrDefault();
+        return observation == null ? null : ToViewModel(observation);
     }
 
-    private static ObservationViewModel ToViewModel(Dictionary<string, object> row)
+    private static ObservationViewModel ToViewModel(Observation observation)
     {
-        var id = Convert.ToInt32(row["observation_id"]);
-        var author = (string)row["author"];
-        var message = (string)row["message"];
-        var timestamp = Methods.UnixTimeStampToDateTimeString(
-            Convert.ToInt64(row["pub_date"])
+        return new ObservationViewModel(
+            observation.Id,
+            observation.Author.Name,
+            observation.Text,
+            Methods.DateTimeToString(observation.TimeStamp)
         );
-
-        return new ObservationViewModel(id, author, message, timestamp);
     }
 }
 
@@ -142,31 +99,16 @@ public class CommentService : ICommentService
 {
     private const int PageSize = 32;
 
-    private readonly DBFacade _db;
+    private readonly IPostRepository _repository;
 
-    public CommentService(DBFacade db)
+    public CommentService(IPostRepository repository)
     {
-        _db = db;
+        _repository = repository;
     }
 
-    public CommentPage GetComments(int observationId, int page) {
-        const string sql = @"
-            SELECT u.username AS author, c.text AS message, c.pub_date AS pub_date,
-            c.observation_id AS observation_id
-            FROM comments c
-            JOIN user u ON c.author_id = u.user_id
-            WHERE c.observation_id = @observationId
-            ORDER BY c.pub_date DESC
-            LIMIT @pageSize OFFSET @offset";
-
-        var parameters = new Dictionary<string, object>
-        {
-            { "@observationId", observationId },
-            { "@pageSize", PageSize + 1 },
-            { "@offset", (page - 1) * PageSize }
-        };
-
-        var rows = _db.Query(sql, parameters);
+    public CommentPage GetComments(int observationId, int page)
+    {
+        var rows = _repository.GetComments(observationId, (page - 1) * PageSize, PageSize + 1);
 
         var hasNextPage = rows.Count > PageSize;
 
@@ -178,16 +120,14 @@ public class CommentService : ICommentService
         return new CommentPage(comments, hasNextPage);
     }
 
-    private static CommentViewModel ToViewModel(Dictionary<string, object> row)
+    private static CommentViewModel ToViewModel(Comment comment)
     {
-        var observationId = Convert.ToInt32(row["observation_id"]);
-        var author = (string)row["author"];
-        var message = (string)row["message"];
-        var timestamp = Methods.UnixTimeStampToDateTimeString(
-            Convert.ToInt64(row["pub_date"])
+        return new CommentViewModel(
+            comment.ObservationId,
+            comment.Author.Name,
+            comment.Text,
+            Methods.DateTimeToString(comment.TimeStamp)
         );
-
-        return new CommentViewModel(observationId, author, message, timestamp);
     }
 }
 
@@ -200,31 +140,16 @@ public class ProposalService : IProposalService
 {
     private const int PageSize = 32;
 
-    private readonly DBFacade _db;
+    private readonly IPostRepository _repository;
 
-    public ProposalService(DBFacade db)
+    public ProposalService(IPostRepository repository)
     {
-        _db = db;
+        _repository = repository;
     }
 
-    public ProposalPage GetProposals(int observationId, int page) {
-        const string sql = @"
-            SELECT u.username AS author, p.text AS message, p.pub_date AS pub_date,
-            p.observation_id AS observation_id, p.taxon_id AS taxon_id
-            FROM proposals p
-            JOIN user u ON p.author_id = u.user_id
-            WHERE p.observation_id = @observationId
-            ORDER BY p.pub_date DESC
-            LIMIT @pageSize OFFSET @offset";
-
-        var parameters = new Dictionary<string, object>
-        {
-            { "@observationId", observationId },
-            { "@pageSize", PageSize + 1 },
-            { "@offset", (page - 1) * PageSize }
-        };
-
-        var rows = _db.Query(sql, parameters);
+    public ProposalPage GetProposals(int observationId, int page)
+    {
+        var rows = _repository.GetProposals(observationId, (page - 1) * PageSize, PageSize + 1);
 
         var hasNextPage = rows.Count > PageSize;
 
@@ -236,37 +161,22 @@ public class ProposalService : IProposalService
         return new ProposalPage(proposals, hasNextPage);
     }
 
-    private static ProposalViewModel ToViewModel(Dictionary<string, object> row)
+    private static ProposalViewModel ToViewModel(Proposal proposal)
     {
-        var observationId = Convert.ToInt32(row["observation_id"]);
-        var taxonId = (string)row["taxon_id"];
-        var author = (string)row["author"];
-        var message = (string)row["message"];
-        var timestamp = Methods.UnixTimeStampToDateTimeString(
-            Convert.ToInt64(row["pub_date"])
+        return new ProposalViewModel(
+            proposal.ObservationId,
+            proposal.TaxonId,
+            proposal.Author.Name,
+            proposal.Text,
+            Methods.DateTimeToString(proposal.TimeStamp)
         );
-
-        return new ProposalViewModel(observationId, taxonId, author, message, timestamp);
     }
-
 }
-public static class Methods {
-    public static string UnixTimeStampToDateTimeString(long unixTimeStamp)
+
+public static class Methods
+{
+    public static string DateTimeToString(DateTime dateTime)
     {
-        // Unix timestamp is seconds past epoch
-        DateTime dateTime = new DateTime(
-            1970,
-            1,
-            1,
-            0,
-            0,
-            0,
-            0,
-            DateTimeKind.Utc
-        );
-
-        dateTime = dateTime.AddSeconds(unixTimeStamp);
-
         return dateTime.ToString("MM/dd/yy H:mm:ss");
     }
 }
