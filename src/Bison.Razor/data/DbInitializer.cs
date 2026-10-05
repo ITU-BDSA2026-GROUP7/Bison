@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bison.Razor.Data;
 
-public static class DbSeeder
+public static class DbInitializer
 {
     public static async Task SeedAsync(BisonDBContext dbContext)
     {
