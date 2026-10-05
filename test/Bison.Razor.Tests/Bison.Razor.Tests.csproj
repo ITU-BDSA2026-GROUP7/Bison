@@ -24,4 +24,14 @@
     <ProjectReference Include="..\..\src\Bison.Razor\Bison.Razor.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="data\schema.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  
+    <None Include="data\dump.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
