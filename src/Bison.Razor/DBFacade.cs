@@ -51,16 +51,18 @@ public class DBFacade
         using var connection = new SqliteConnection($"Data Source ={dbFilePath}");
         connection.Open();
 
-        var basePath = AppContext.BaseDirectory;
+        var schemaPath = Path.Combine(AppContext.BaseDirectory, "schema.sql");
 
-        var schema = File.ReadAllText(Path.Combine(basePath, "schema.sql"));
-        var dump = File.ReadAllText(Path.Combine(basePath, "dump.sql"));
+        var dumpPath = Path.Combine(AppContext.BaseDirectory, "dump.sql");
+
+        var schemaSql = File.ReadAllText(schemaPath);
+        var dumpSql = File.ReadAllText(dumpPath);
 
         using var command = connection.CreateCommand();
-        command.CommandText = schema;
+        command.CommandText = schemaPath;
         command.ExecuteNonQuery();
 
-        command.CommandText = dump;
+        command.CommandText = dumpPath;
         command.ExecuteNonQuery();
     }
 
