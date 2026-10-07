@@ -1,15 +1,11 @@
 ---
-name: User story
+name: As a [type of user] I want [goal / feature] So that [reason / benefit]
 about: create a user story describing a feature from the user's perspective
 title: User story
 labels: ''
 assignees: ''
 
 ---
-
-As a [type of user]
-I want [goal / feature]
-So that [reason / benefit]
 
 Acceptence criteria
 - [Criterion 1]
