@@ -27,7 +27,7 @@ await using (var scope = app.Services.CreateAsyncScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<BisonDBContext>();
     await dbContext.Database.EnsureCreatedAsync();
-    await DbInitializer.SeedAsync(dbContext);
+    DbInitializer.SeedDatabase(dbContext);
 }
 
 // Configure the HTTP request pipeline.
