@@ -1,7 +1,7 @@
 ---
-name: As a [type of user] I want [goal / feature] So that [reason / benefit]
+name: User Story
 about: create a user story describing a feature from the user's perspective
-title: User story
+title: As a [type of user] I want [goal / feature] So that [reason / benefit]
 labels: ''
 assignees: ''
 
