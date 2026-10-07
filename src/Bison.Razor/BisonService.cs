@@ -5,7 +5,7 @@ public record ObservationViewModel(int Id, string Author, string Message, string
 
 public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp);
 
-public record ProposalViewModel(int ObservationId, string TaxonId, string Author, string Message, string Timestamp);
+public record ProposalViewModel(int Id, string TaxonName, string Author, string Message, string Timestamp);
 
 public record ObservationPage(
     List<ObservationViewModel> Observations,
@@ -79,13 +79,22 @@ public class ObservationService : IObservationService
         return observation == null ? null : ToViewModel(observation);
     }
 
-    private static ObservationViewModel ToViewModel(Observation observation)
+    private static ObservationViewModel ToViewModel(ObservationDetailsDTO observation)
     {
         return new ObservationViewModel(
             observation.Id,
-            observation.Author.Name,
+            observation.AuthorName,
             observation.Text,
-            Methods.DateTimeToString(observation.TimeStamp)
+            observation.Timestamp
+        );
+    }
+    private static ObservationViewModel ToViewModel(ObservationListDTO observation)
+    {
+        return new ObservationViewModel(
+            observation.Id,
+            observation.AuthorName,
+            observation.Text,
+            observation.Timestamp
         );
     }
 }
@@ -120,13 +129,13 @@ public class CommentService : ICommentService
         return new CommentPage(comments, hasNextPage);
     }
 
-    private static CommentViewModel ToViewModel(Comment comment)
+    private static CommentViewModel ToViewModel(CommentDTO comment)
     {
         return new CommentViewModel(
-            comment.ObservationId,
-            comment.Author.Name,
+            comment.Id,
+            comment.AuthorName,
             comment.Text,
-            Methods.DateTimeToString(comment.TimeStamp)
+            comment.Timestamp
         );
     }
 }
@@ -161,14 +170,14 @@ public class ProposalService : IProposalService
         return new ProposalPage(proposals, hasNextPage);
     }
 
-    private static ProposalViewModel ToViewModel(Proposal proposal)
+    private static ProposalViewModel ToViewModel(ProposalDTO proposal)
     {
         return new ProposalViewModel(
-            proposal.ObservationId,
-            proposal.TaxonId,
-            proposal.Author.Name,
+            proposal.Id,
+            proposal.TaxonName,
+            proposal.AuthorName,
             proposal.Text,
-            Methods.DateTimeToString(proposal.TimeStamp)
+            proposal.Timestamp
         );
     }
 }
