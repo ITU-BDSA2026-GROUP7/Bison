@@ -6,7 +6,7 @@ public interface IPostRepository
 {
     public List<ObservationListDTO> GetObservations(int skip, int take);
 
-
+    List<Observation> GetObservationsForTaxonFilter();
     List<ObservationListDTO> GetObservationsFromAuthor(string author, int skip, int take);
     ObservationDetailsDTO? GetObservation(int id);
 
