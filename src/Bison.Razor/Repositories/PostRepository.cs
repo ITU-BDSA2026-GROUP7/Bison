@@ -105,4 +105,13 @@ public class PostRepository : IPostRepository
             })
             .ToList();
     }
+
+    public List<Observation> GetObservationsForTaxonFilter()
+    {
+        return _context.Observations
+            .Include(o => o.Author)
+            .Include(o => o.Taxon)
+            .OrderByDescending(o => o.TimeStamp)
+            .ToList();
+    }
 }

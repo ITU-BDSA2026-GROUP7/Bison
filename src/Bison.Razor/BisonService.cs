@@ -1,4 +1,5 @@
 using Bison.Razor.Models;
+using Bison.Razor.Services;
 using Bison.Razor.Repositories;
 
 public record ObservationViewModel(int Id, string Author, string Message, string Timestamp);
@@ -30,6 +31,7 @@ public interface IObservationService
     public ObservationPage GetObservations(int page);
     public ObservationPage GetObservationsFromAuthor(string author, int page);
     public ObservationViewModel? GetObservation(int id);
+    public ObservationPage GetObservationsForTaxon(string taxonId, int page);
 }
 
 public class ObservationService : IObservationService
@@ -37,10 +39,14 @@ public class ObservationService : IObservationService
     private const int PageSize = 32;
 
     private readonly IPostRepository _repository;
+    private readonly ITaxonFilterService _taxonFilterService;
 
-    public ObservationService(IPostRepository repository)
+    public ObservationService(
+        IPostRepository repository,
+         ITaxonFilterService taxonFilterService)
     {
         _repository = repository;
+        _taxonFilterService = taxonFilterService;
     }
 
     public ObservationPage GetObservations(int page)
@@ -67,6 +73,32 @@ public class ObservationService : IObservationService
         var observations = rows
             .Take(PageSize)
             .Select(ToViewModel)
+            .ToList();
+
+        return new ObservationPage(observations, hasNextPage);
+    }
+
+    public ObservationPage GetObservationsForTaxon(string taxonId, int page)
+    {
+        // Filter all observations first, using the Dafny-generated filter.
+        var filteredRows = _taxonFilterService.FilterObservations(taxonId);
+
+        // Then select the requested page, plus one extra row.
+        var rows = filteredRows
+            .Skip((page - 1) * PageSize)
+            .Take(PageSize + 1)
+            .ToList();
+
+        var hasNextPage = rows.Count > PageSize;
+
+        var observations = rows
+            .Take(PageSize)
+            .Select(o => new ObservationViewModel(
+                o.Id,
+                o.Author.Name,
+                o.Text,
+                o.TimeStamp.ToString("yyyy-MM-dd HH:mm")
+            ))
             .ToList();
 
         return new ObservationPage(observations, hasNextPage);

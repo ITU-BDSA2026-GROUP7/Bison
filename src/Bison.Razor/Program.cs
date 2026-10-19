@@ -1,5 +1,6 @@
 using Bison.Razor.Data;
 using Bison.Razor.Models;
+using Bison.Razor.Services;
 using Bison.Razor.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IObservationService, ObservationService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IProposalService, ProposalService>();
+builder.Services.AddScoped<ITaxonFilterService, TaxonFilterService>();
 
 
 var app = builder.Build();
