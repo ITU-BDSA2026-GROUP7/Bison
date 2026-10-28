@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bison.Razor.Models;
 
-public class BisonDBContext : DbContext
+// IdentityDbContext adds the AspNetUsers/AspNetUserLogins/... tables.
+// Author is the user type, IdentityRole<int> the (unused) role type, int the key type.
+public class BisonDBContext : IdentityDbContext<Author, IdentityRole<int>, int>
 {
     public BisonDBContext(DbContextOptions<BisonDBContext> options) : base(options) { }
 
@@ -15,6 +19,9 @@ public class BisonDBContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Must run first: it configures all the Identity tables and keys.
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Post>().HasDiscriminator<string>("Discriminator")
             .HasValue<Observation>("Observation")
             .HasValue<Comment>("Comment")
