@@ -72,6 +72,10 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
+// There is no page at "/", but Identity sends users there after logging in
+// or out, and the handout expects Public Observations at "/". Redirect it.
+app.MapGet("/", () => Results.Redirect("/obs"));
+
 app.Run();
 
 public partial class Program

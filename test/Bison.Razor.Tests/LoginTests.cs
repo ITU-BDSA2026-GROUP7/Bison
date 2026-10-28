@@ -37,6 +37,20 @@ public class LoginTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task RootRedirectsToPublicObservations()
+    {
+        using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        var response = await client.GetAsync("/");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/obs", response.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
     public async Task AnonymousUserSeesRegisterAndLoginInNavigation()
     {
         using var client = _factory.CreateClient();
