@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using Bison.Razor.Models
+@inject UserManager<Author> UserManager
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>@ViewData["Title"]</title>
@@ -8,6 +11,31 @@
 <body>
 <div class=page>
     <h1><img src="/images/icon1.png" alt="Icon1"/>Bison</h1>
+
+    <div class=navigation>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            // Look up the logged-in Author so "My Observations" uses their
+            // display name, which is what the /obs/{author} page filters on.
+            var me = await UserManager.GetUserAsync(User);
+            var myName = string.IsNullOrEmpty(me?.Name) ? User.Identity.Name : me.Name;
+            <div>
+                <a href="/obs/@myName">My Observations</a> |
+                <a href="/obs">Public Observations</a> |
+                <form method="post" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/obs">
+                    <button type="submit">Logout [@User.Identity.Name]</button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div>
+                <a href="/obs">Public Observations</a> |
+                <a asp-area="Identity" asp-page="/Account/Register">Register</a> |
+                <a asp-area="Identity" asp-page="/Account/Login">Login</a>
+            </div>
+        }
+    </div>
 
     <div class=body>
             @RenderBody()
