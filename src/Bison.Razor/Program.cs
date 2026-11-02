@@ -34,6 +34,17 @@ builder.Services.AddDefaultIdentity<Author>(options =>
     })
     .AddEntityFrameworkStores<BisonDBContext>();
 
+// github OAuth
+builder.Services
+    .AddAuthentication()
+    .AddGitHub(o =>
+    {
+        o.ClientId = builder.Configuration["authentication:github:clientId"]!;
+        o.ClientSecret = builder.Configuration["authentication:github:clientSecret"]!;
+        o.CallbackPath = "/signin-github";
+    });
+
+
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IObservationService, ObservationService>();
 builder.Services.AddScoped<ICommentService, CommentService>();

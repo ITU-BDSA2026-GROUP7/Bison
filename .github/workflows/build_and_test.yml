@@ -41,4 +41,7 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Test
+        env:
+          authentication__github__clientId: test-client-id
+          authentication__github__clientSecret: test-client-secret
         run: dotnet test --no-build
