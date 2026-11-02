@@ -4,7 +4,6 @@ using Bison.Razor.Services;
 using Bison.Razor.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,19 +34,15 @@ builder.Services.AddDefaultIdentity<Author>(options =>
     })
     .AddEntityFrameworkStores<BisonDBContext>();
 
-builder.Services.AddAuthentication(options =>
+// github OAuth
+builder.Services
+    .AddAuthentication()
+    .AddGitHub(o =>
     {
-        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = "GitHub";
-})
-.AddCookie()
-.AddGitHub(o =>
-{
-o.ClientId = builder.Configuration["authentication:github:clientId"]!;
-o.ClientSecret = builder.Configuration["authentication:github:clientSecret"]!;
-o.CallbackPath = "/signin-github";
-}); 
+        o.ClientId = builder.Configuration["authentication:github:clientId"]!;
+        o.ClientSecret = builder.Configuration["authentication:github:clientSecret"]!;
+        o.CallbackPath = "/signin-github";
+    });
 
 
 builder.Services.AddScoped<IPostRepository, PostRepository>();
