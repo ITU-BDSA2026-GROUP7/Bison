@@ -34,7 +34,7 @@ builder.Services.AddDefaultIdentity<Author>(options =>
     })
     .AddEntityFrameworkStores<BisonDBContext>();
 
-// github OAuth
+// github OAuth :)
 builder.Services
     .AddAuthentication()
     .AddGitHub(o =>
