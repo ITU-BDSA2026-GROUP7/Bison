@@ -1,5 +1,6 @@
 ﻿using Bison.Razor.Models;
 using Bison.Razor.Services;
+using Bison.Razor.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -9,7 +10,7 @@ public class PublicModel : PageModel
 {
     private readonly IObservationService _service;
 
-    private readonly ITaxonFilterService _taxonFilterService;
+    private readonly ITaxonRepository _taxonRepository;
 
     public List<Taxon> Taxa { get; set; } = new();
 
@@ -21,10 +22,10 @@ public class PublicModel : PageModel
 
     public PublicModel(
         IObservationService service,
-        ITaxonFilterService taxonFilterService)
+        ITaxonRepository taxonRepository)
     {
         _service = service;
-        _taxonFilterService = taxonFilterService;
+        _taxonRepository = taxonRepository;
     }
 
     public ActionResult OnGet(
@@ -38,7 +39,7 @@ public class PublicModel : PageModel
 
         CurrentPage = page;
         SelectedTaxonId = taxonId;
-        Taxa = _taxonFilterService.GetTaxa();
+        Taxa = _taxonRepository.GetTaxa();
 
         var result = string.IsNullOrWhiteSpace(taxonId)
             ? _service.GetObservations(page)

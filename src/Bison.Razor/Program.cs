@@ -50,6 +50,7 @@ builder.Services.AddScoped<IObservationService, ObservationService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IProposalService, ProposalService>();
 builder.Services.AddScoped<ITaxonFilterService, TaxonFilterService>();
+builder.Services.AddScoped<ITaxonRepository, TaxonRepository>();
 
 
 var app = builder.Build();

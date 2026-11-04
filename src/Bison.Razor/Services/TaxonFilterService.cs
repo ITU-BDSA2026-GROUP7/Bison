@@ -8,27 +8,25 @@ namespace Bison.Razor.Services;
 public interface ITaxonFilterService
 {
     List<Observation> FilterObservations(string taxonId);
-
-    List<Taxon> GetTaxa();
 }
 
 public class TaxonFilterService : ITaxonFilterService
 {
     private readonly IPostRepository _postRepository;
-    private readonly BisonDBContext _context;
+    private readonly ITaxonRepository _taxonRepository;
 
     public TaxonFilterService(
         IPostRepository postRepository,
-        BisonDBContext context)
+        ITaxonRepository taxonRepository)
     {
         _postRepository = postRepository;
-        _context = context;
+        _taxonRepository = taxonRepository;
     }
 
     public List<Observation> FilterObservations(string taxonId)
     {
         // Load all taxa so we can connect the complete hierarchy.
-        var taxa = _context.Taxa.ToList();
+        var taxa = _taxonRepository.GetTaxa().ToList();
 
         var taxaById = taxa.ToDictionary(t => t.DwcTaxonId);
 
@@ -74,13 +72,6 @@ public class TaxonFilterService : ITaxonFilterService
         // Convert the result back into the original application models.
         return filtered
             .Select(o => o.Original)
-            .ToList();
-    }
-
-    public List<Taxon> GetTaxa()
-    {
-        return _context.Taxa
-            .OrderBy(t => t.DanishVernacularName)
             .ToList();
     }
 }
