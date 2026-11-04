@@ -34,4 +34,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <AdditionalFiles
+     Include="CodeMetricsConfig.txt" />
+  </ItemGroup>
+
 </Project>
