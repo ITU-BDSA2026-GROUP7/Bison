@@ -46,11 +46,12 @@ builder.Services
 
 
 builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<ITaxonRepository, TaxonRepository>();
 builder.Services.AddScoped<IObservationService, ObservationService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IProposalService, ProposalService>();
 builder.Services.AddScoped<ITaxonFilterService, TaxonFilterService>();
-builder.Services.AddScoped<ITaxonRepository, TaxonRepository>();
+builder.Services.AddScoped<ITaxonService, TaxonService>();
 
 
 var app = builder.Build();
