@@ -8,4 +8,5 @@ public class ObservationDTO
     public string Text { get; set; } = "";
     public DateTime Timestamp { get; set; }
     public string? TaxonId { get; set; }
+    public string? PicturePath { get; set; }
 }
