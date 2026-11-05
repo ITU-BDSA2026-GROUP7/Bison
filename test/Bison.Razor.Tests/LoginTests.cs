@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.RegularExpressions;
-using Bison.Razor.Models;
+using Bison.Core.Domain;
+using Bison.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

@@ -8,30 +8,14 @@
     <UserSecretsId>9f892de5-6e15-4a29-9f1d-50783b57df0b</UserSecretsId>
   </PropertyGroup>
 
-    <ItemGroup>
-    <Compile Remove="Dafny\obj\**;Dafny\bin\**" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="8.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="data\schema.sql">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
- 
-    <None Include="data\dump.sql">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\Bison.Core\Bison.Core.csproj" />
+    <ProjectReference Include="..\Bison.Infrastructure\Bison.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
