@@ -1,5 +1,4 @@
-﻿using Bison.Razor.Models;
-using Bison.Razor.Services;
+﻿using Bison.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 

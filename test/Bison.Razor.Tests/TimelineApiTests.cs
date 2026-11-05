@@ -1,4 +1,5 @@
-using Bison.Razor.Models;
+using Bison.Core.Domain;
+using Bison.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;

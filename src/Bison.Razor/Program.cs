@@ -1,9 +1,9 @@
-using Bison.Razor.Data;
-using Bison.Razor.Models;
-using Bison.Razor.Services;
-using Bison.Razor.Repositories;
+using Bison.Core.Domain;
+using Bison.Core.Services;
+using Bison.Infrastructure;
+using Bison.Infrastructure.Data;
+using Bison.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 
-var efDbPath = Environment.GetEnvironmentVariable("BISON_EF_DBPATH")
-    ?? Path.Combine(Path.GetTempPath(), "bison-ef.db");
-builder.Services.AddDbContext<BisonDBContext>(options =>
-    options.UseSqlite($"Data Source={efDbPath}"));
+builder.Services.AddBisonInfrastructure();
 
 
 // ASP.NET Core Identity: login/register/logout, backed by BisonDBContext.
@@ -45,8 +42,6 @@ builder.Services
     });
 
 
-builder.Services.AddScoped<IPostRepository, PostRepository>();
-builder.Services.AddScoped<ITaxonRepository, TaxonRepository>();
 builder.Services.AddScoped<IObservationService, ObservationService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IProposalService, ProposalService>();
