@@ -29,7 +29,8 @@ public class PostRepository : IPostRepository
                 Text = o.Text,
                 AuthorName = o.Author.Name,
                 TaxonName = o.Taxon.DanishVernacularName,
-                Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm")
+                Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
+                PicturePath = o.PicturePath
             })
             .ToList();
     }
@@ -49,7 +50,8 @@ public class PostRepository : IPostRepository
                 Text = o.Text,
                 AuthorName = o.Author.Name,
                 TaxonName = o.Taxon.DanishVernacularName,
-                Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm")
+                Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
+                PicturePath = o.PicturePath
             })
             .ToList();
     }
@@ -66,7 +68,8 @@ public class PostRepository : IPostRepository
                 Text = o.Text,
                 AuthorName = o.Author.Name,
                 TaxonName = o.Taxon.DanishVernacularName,
-                Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm")
+                Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
+                PicturePath = o.PicturePath
             })
             .FirstOrDefault();
     }
@@ -119,7 +122,8 @@ public class PostRepository : IPostRepository
                 AuthorName = o.Author.Name,
                 Text = o.Text,
                 Timestamp = o.TimeStamp,
-                TaxonId = o.TaxonId
+                TaxonId = o.TaxonId,
+                PicturePath = o.PicturePath
             })
             .ToList();
     }
