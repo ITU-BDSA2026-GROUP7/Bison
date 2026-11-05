@@ -95,9 +95,9 @@ public class ObservationService : IObservationService
             .Take(PageSize)
             .Select(o => new ObservationViewModel(
                 o.Id,
-                o.Author.Name,
+                o.AuthorName,
                 o.Text,
-                o.TimeStamp.ToString("yyyy-MM-dd HH:mm")
+                o.Timestamp.ToString("yyyy-MM-dd HH:mm")
             ))
             .ToList();
 

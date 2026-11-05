@@ -1,52 +1,60 @@
-using Bison.Razor.Models;
-
 namespace TaxonFilter;
 
 public class Taxon
 {
-    private readonly Bison.Razor.Models.Taxon _taxon;
+    private readonly Bison.Razor.DTO.TaxonDTO _taxon;
+    private readonly IReadOnlyDictionary<string, Bison.Razor.DTO.TaxonDTO> _taxaById;
 
-    public Taxon(Bison.Razor.Models.Taxon taxon)
+    public Taxon(Bison.Razor.DTO.TaxonDTO taxon, IReadOnlyDictionary<string, Bison.Razor.DTO.TaxonDTO> taxaById)
     {
         _taxon = taxon;
+        _taxaById = taxaById;
     }
 
-    public bool isSubTaxon(Taxon ancester)
+    public bool isSubTaxon(Taxon ancestor)
     {
         var current = _taxon;
 
-        while (current != null)
-        {
-            if (current.DwcTaxonId == ancester._taxon.DwcTaxonId)
-            {
-                return true;
-            }
+    while (true)
+    {
+        if (current.DwcTaxonId == ancestor._taxon.DwcTaxonId)
+            return true;
 
-            current = current.Parent;
-        }
+        if (current.ParentId is null ||
+            !_taxaById.TryGetValue(current.ParentId, out current))
+            return false;
+    }
 
-        return false;
+    }
+
+    public string getId()
+    {
+        return _taxon.DwcTaxonId;
     }
 }
 
 public class Observation
 {
-    private readonly Bison.Razor.Models.Observation _observation;
-    public Bison.Razor.Models.Observation Original => _observation;
+    private readonly Bison.Razor.DTO.ObservationDTO _observation;
+    public Bison.Razor.DTO.ObservationDTO Original => _observation;
+    private readonly IReadOnlyDictionary<string, Bison.Razor.DTO.TaxonDTO> _taxaById;
 
-    public Observation(Bison.Razor.Models.Observation observation)
+    public Observation(Bison.Razor.DTO.ObservationDTO observation, IReadOnlyDictionary<string, Bison.Razor.DTO.TaxonDTO> taxaById)
     {
         _observation = observation;
+        _taxaById = taxaById;
+
     }
 
-    public Taxon getTaxon()
+    public Taxon getTaxon() 
     {
-        if (_observation.Taxon == null)
+        if (_observation.TaxonId == null ||
+            !_taxaById.TryGetValue(_observation.TaxonId, out var taxon))
         {
             throw new InvalidOperationException(
-                "Cannot filter an observation without a taxon.");
+                "Cannot filter an observation without a matching taxon.");
         }
 
-        return new Taxon(_observation.Taxon);
+        return new Taxon(taxon, _taxaById);
     }
 }

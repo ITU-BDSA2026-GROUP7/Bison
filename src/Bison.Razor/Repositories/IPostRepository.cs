@@ -1,4 +1,4 @@
-using Bison.Razor.Models;
+using Bison.Razor.DTO;
 
 namespace Bison.Razor.Repositories;
 
@@ -6,7 +6,7 @@ public interface IPostRepository
 {
     public List<ObservationListDTO> GetObservations(int skip, int take);
 
-    List<Observation> GetObservationsForTaxonFilter();
+    List<ObservationDTO> GetObservationsForTaxonFilter();
     List<ObservationListDTO> GetObservationsFromAuthor(string author, int skip, int take);
     ObservationDetailsDTO? GetObservation(int id);
 

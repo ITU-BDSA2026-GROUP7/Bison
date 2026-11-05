@@ -1,4 +1,5 @@
 using Bison.Razor.Models;
+using Bison.Razor.DTO;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bison.Razor.Repositories;
@@ -106,12 +107,18 @@ public class PostRepository : IPostRepository
             .ToList();
     }
 
-    public List<Observation> GetObservationsForTaxonFilter()
+    public List<ObservationDTO> GetObservationsForTaxonFilter()
     {
         return _context.Observations
-            .Include(o => o.Author)
-            .Include(o => o.Taxon)
             .OrderByDescending(o => o.TimeStamp)
+            .Select(o => new ObservationDTO
+            {
+                Id = o.Id,
+                AuthorName = o.Author.Name,
+                Text = o.Text,
+                Timestamp = o.TimeStamp,
+                TaxonId = o.TaxonId
+            })
             .ToList();
     }
 }

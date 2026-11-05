@@ -1,5 +1,5 @@
 using Bison.Razor.Repositories;
-using Bison.Razor.Models;
+using Bison.Razor.DTO;
 
 namespace Bison.Razor.Services;
 
@@ -24,7 +24,7 @@ public class TaxonService : ITaxonService
         var list = new List<TaxonViewModel>();
         var taxa = _taxonRepository.GetTaxa();
         
-        foreach (Taxon taxon in taxa) {
+        foreach (TaxonDTO taxon in taxa) {
             var taxonmodel = new TaxonViewModel(taxon.DwcTaxonId,
             taxon.DanishVernacularName);
             

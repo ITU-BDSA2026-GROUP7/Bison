@@ -1,10 +1,11 @@
 using Bison.Razor.Models;
+using Bison.Razor.DTO;
 
 namespace Bison.Razor.Repositories;
 
 public interface ITaxonRepository {
 
-    public List<Taxon> GetTaxa();
+    public List<TaxonDTO> GetTaxa();
 }
 
 public class TaxonRepository : ITaxonRepository
@@ -16,10 +17,16 @@ public class TaxonRepository : ITaxonRepository
         _context = context;
     }
 
-    public List<Taxon> GetTaxa()
+    public List<TaxonDTO> GetTaxa()
     {
-        return _context.Taxa
-            .OrderBy(t => t.DanishVernacularName)
-            .ToList();
+       return _context.Taxa
+        .OrderBy(t => t.DanishVernacularName)
+        .Select(t => new TaxonDTO
+        {
+            DwcTaxonId = t.DwcTaxonId,
+            DanishVernacularName = t.DanishVernacularName,
+            ParentId = t.ParentId
+        })
+        .ToList();
     }
 }
