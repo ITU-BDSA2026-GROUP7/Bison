@@ -13,10 +13,21 @@
         <div class="observationbox">
             <h3>What did you see, @(User.Identity?.Name)?</h3>
             <form method="post">
+                <p>
+                    <label asp-for="ObservedTaxonId">Taxon:</label>
+                    <select asp-for="ObservedTaxonId">
+                        <option value="">Don't know</option>
+                        @foreach (var taxon in Model.NamedTaxa)
+                        {
+                            <option value="@taxon.DwcTaxonId">@taxon.DanishVernacularName</option>
+                        }
+                    </select>
+                </p>
                 <input style="float: left" type="text" asp-for="Text">
                 <input type="submit" value="Share">
             </form>
             <span asp-validation-for="Text"></span>
+            <span asp-validation-for="ObservedTaxonId"></span>
         </div>
     }
 

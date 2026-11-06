@@ -11,6 +11,8 @@ public class UserTimelineModel : PageModel
 {
     private readonly IObservationService _service;
 
+    private readonly ITaxonService _taxonService;
+
     private readonly UserManager<Author> _userManager;
 
     public List<ObservationViewModel> Observations { get; set; } = new();
@@ -21,13 +23,25 @@ public class UserTimelineModel : PageModel
     // ("My Observations"). Only then is the input field shown.
     public bool IsOwnTimeline { get; set; }
 
+    // The taxa offered in the "What did you see?" dropdown (only loaded on
+    // your own timeline). Genera without a Danish name are left out.
+    public List<TaxonViewModel> NamedTaxa { get; set; } = new();
+
     [BindProperty]
     [Required(ErrorMessage = "Write what you saw before sharing.")]
     public string Text { get; set; } = string.Empty;
 
-    public UserTimelineModel(IObservationService service, UserManager<Author> userManager)
+    // The taxon picked in the form. Empty means "Don't know".
+    [BindProperty]
+    public string? ObservedTaxonId { get; set; }
+
+    public UserTimelineModel(
+        IObservationService service,
+        ITaxonService taxonService,
+        UserManager<Author> userManager)
     {
         _service = service;
+        _taxonService = taxonService;
         _userManager = userManager;
     }
 
@@ -44,6 +58,13 @@ public class UserTimelineModel : PageModel
             return Challenge();
         }
 
+        // Same check as on the public page: only accept taxa that exist.
+        if (!string.IsNullOrEmpty(ObservedTaxonId) &&
+            !_taxonService.GetTaxa().Any(t => t.DwcTaxonId == ObservedTaxonId))
+        {
+            ModelState.AddModelError(nameof(ObservedTaxonId), "Pick a taxon from the list.");
+        }
+
         if (!ModelState.IsValid)
         {
             await LoadTimelineAsync(author, 1);
@@ -58,7 +79,7 @@ public class UserTimelineModel : PageModel
 
         // The observation is always saved as the logged-in user,
         // no matter whose timeline the form was posted from.
-        _service.CreateObservation(me.Id, Text);
+        _service.CreateObservation(me.Id, Text, ObservedTaxonId);
 
         return RedirectToPage(new { author });
     }
@@ -76,6 +97,14 @@ public class UserTimelineModel : PageModel
         {
             var me = await _userManager.GetUserAsync(User);
             IsOwnTimeline = me != null && me.Name == author;
+        }
+
+        // Only your own timeline shows the form, so only load taxa then.
+        if (IsOwnTimeline)
+        {
+            NamedTaxa = _taxonService.GetTaxa()
+                .Where(t => !string.IsNullOrEmpty(t.DanishVernacularName))
+                .ToList();
         }
 
         var result = _service.GetObservationsFromAuthor(author, page);

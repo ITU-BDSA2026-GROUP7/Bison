@@ -57,8 +57,11 @@ public class MakeObservationTests : IAsyncLifetime
 
         Assert.Contains("observationbox", publicHtml);
         Assert.Contains("What did you see, edka@itu.dk?", publicHtml);
+        Assert.Contains("Don't know", publicHtml);
         Assert.Contains("My Observations </h2>", ownHtml);
         Assert.Contains("observationbox", ownHtml);
+        // The own timeline has no taxon filter, so this proves the box's dropdown loaded the taxa.
+        Assert.Contains("Fiskehejre", ownHtml);
     }
 
     [Fact]
@@ -99,6 +102,34 @@ public class MakeObservationTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Contains(text, await client.GetStringAsync("/obs/Eduard"));
         Assert.Contains(text, await client.GetStringAsync("/obs"));
+    }
+
+    [Fact]
+    public async Task ObservationWithTaxonShowsUpWhenFilteringByThatTaxon()
+    {
+        using var client = CreateClient();
+        await LogInAsync(client, "edka@itu.dk", "123456");
+        var text = $"Grey heron by the lake {Guid.NewGuid():N}";
+
+        var response = await PostObservationAsync(client, "/obs", text, GreyHeronId);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Contains(text, await client.GetStringAsync($"/obs?taxonId={Uri.EscapeDataString(GreyHeronId)}"));
+        Assert.DoesNotContain(text, await client.GetStringAsync($"/obs?taxonId={Uri.EscapeDataString(CormorantsId)}"));
+    }
+
+    [Fact]
+    public async Task ObservationWithUnknownTaxonIsNotStored()
+    {
+        using var client = CreateClient();
+        await LogInAsync(client, "edka@itu.dk", "123456");
+        var countBefore = CountObservations();
+
+        var response = await PostObservationAsync(client, "/obs", "Mystery bird", "not-a-real-taxon");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Pick a taxon from the list.", await response.Content.ReadAsStringAsync());
+        Assert.Equal(countBefore, CountObservations());
     }
 
     [Fact]
@@ -164,13 +195,19 @@ public class MakeObservationTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
     }
 
+    // Taxon ids from the seed data in DbInitializer.
+    private const string GreyHeronId = "MSTSNM:Arter:c28811f4-f785-ea11-aa77-501ac539d1ea"; // Fiskehejre
+    private const string CormorantsId = "MSTSNM:Arter:2a5767e4-f785-ea11-aa77-501ac539d1ea"; // Skarver
+
+    // taxonId "" is what the browser sends when "Don't know" is picked.
     private static async Task<HttpResponseMessage> PostObservationAsync(
-        HttpClient client, string url, string text)
+        HttpClient client, string url, string text, string taxonId = "")
     {
         var page = await client.GetStringAsync(url);
         var form = new FormUrlEncodedContent(new Dictionary<string, string>
         {
             ["Text"] = text,
+            ["ObservedTaxonId"] = taxonId,
             ["__RequestVerificationToken"] = GetAntiforgeryToken(page)
         });
         return await client.PostAsync(url, form);

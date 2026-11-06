@@ -17,6 +17,11 @@ public class PublicModel : PageModel
 
     public List<TaxonViewModel> Taxa { get; set; } = new();
 
+    // The taxa offered in the "What did you see?" dropdown. Genera like
+    // "Ardea" have no Danish name, so they are left out to avoid blank options.
+    public List<TaxonViewModel> NamedTaxa =>
+        Taxa.Where(t => !string.IsNullOrEmpty(t.DanishVernacularName)).ToList();
+
     public string? SelectedTaxonId { get; set; }
 
     public List<ObservationViewModel> Observations { get; set; } = new();
@@ -27,6 +32,10 @@ public class PublicModel : PageModel
     [BindProperty]
     [Required(ErrorMessage = "Write what you saw before sharing.")]
     public string Text { get; set; } = string.Empty;
+
+    // The taxon picked in the form. Empty means "Don't know".
+    [BindProperty]
+    public string? ObservedTaxonId { get; set; }
 
     public PublicModel(
         IObservationService service,
@@ -54,6 +63,14 @@ public class PublicModel : PageModel
             return Challenge();
         }
 
+        // The dropdown only offers real taxa, but a hand-made request could
+        // send any id, so check it and show a friendly error instead of crashing.
+        if (!string.IsNullOrEmpty(ObservedTaxonId) &&
+            !_taxonService.GetTaxa().Any(t => t.DwcTaxonId == ObservedTaxonId))
+        {
+            ModelState.AddModelError(nameof(ObservedTaxonId), "Pick a taxon from the list.");
+        }
+
         if (!ModelState.IsValid)
         {
             // Show the page again, with the error message next to the form.
@@ -62,7 +79,7 @@ public class PublicModel : PageModel
         }
 
         var authorId = int.Parse(_userManager.GetUserId(User)!);
-        _service.CreateObservation(authorId, Text);
+        _service.CreateObservation(authorId, Text, ObservedTaxonId);
 
         // Redirect after POST, so refreshing the page does not post twice.
         return RedirectToPage();

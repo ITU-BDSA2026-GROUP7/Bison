@@ -124,7 +124,7 @@ public class PostRepository : IPostRepository
             .ToList();
     }
 
-    public int CreateObservation(int authorId, string text)
+    public int CreateObservation(int authorId, string text, string? taxonId)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -137,10 +137,21 @@ public class PostRepository : IPostRepository
             throw new ArgumentException($"No author with id {authorId} exists.", nameof(authorId));
         }
 
+        // An empty choice means "Don't know", which is stored as no taxon.
+        if (string.IsNullOrWhiteSpace(taxonId))
+        {
+            taxonId = null;
+        }
+        else if (!_context.Taxa.Any(t => t.DwcTaxonId == taxonId))
+        {
+            throw new ArgumentException($"No taxon with id {taxonId} exists.", nameof(taxonId));
+        }
+
         var observation = new Observation
         {
             AuthorId = authorId,
             Text = text.Trim(),
+            TaxonId = taxonId,
             TimeStamp = DateTime.UtcNow
         };
 
