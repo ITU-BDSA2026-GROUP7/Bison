@@ -3,7 +3,7 @@ using Bison.Core.Repositories;
 
 namespace Bison.Core.Services;
 
-public record ObservationViewModel(int Id, string Author, string Message, string Timestamp);
+public record ObservationViewModel(int Id, string Author, string Message, string Timestamp, string? PicturePath = null);
 
 public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp);
 
@@ -98,7 +98,8 @@ public class ObservationService : IObservationService
                 o.Id,
                 o.AuthorName,
                 o.Text,
-                o.Timestamp.ToString("yyyy-MM-dd HH:mm")
+                o.Timestamp.ToString("yyyy-MM-dd HH:mm"),
+                o.PicturePath
             ))
             .ToList();
 
@@ -118,7 +119,8 @@ public class ObservationService : IObservationService
             observation.Id,
             observation.AuthorName,
             observation.Text,
-            observation.Timestamp
+            observation.Timestamp,
+            observation.PicturePath
         );
     }
     private static ObservationViewModel ToViewModel(ObservationListDTO observation)
@@ -127,7 +129,8 @@ public class ObservationService : IObservationService
             observation.Id,
             observation.AuthorName,
             observation.Text,
-            observation.Timestamp
+            observation.Timestamp,
+            observation.PicturePath
         );
     }
 }

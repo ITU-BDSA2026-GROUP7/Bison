@@ -18,6 +18,12 @@
                 @Model.Details.Observation.Message
                 <small>&mdash; @Model.Details.Observation.Timestamp</small>
             </p>
+            @if (!string.IsNullOrEmpty(Model.Details.Observation.PicturePath))
+            {
+                <img class="observation-picture detail"
+                    src="@Model.Details.Observation.PicturePath"
+                    alt="Picture of the animal in the observation by @Model.Details.Observation.Author" />
+            }
         </div>
 
         <h3>Comments</h3>
