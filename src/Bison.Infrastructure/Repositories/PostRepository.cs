@@ -123,4 +123,31 @@ public class PostRepository : IPostRepository
             })
             .ToList();
     }
+
+    public int CreateObservation(int authorId, string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException("An observation must have text.", nameof(text));
+        }
+
+        // Fail with a clear message instead of a foreign-key error from SQLite.
+        if (!_context.Authors.Any(a => a.Id == authorId))
+        {
+            throw new ArgumentException($"No author with id {authorId} exists.", nameof(authorId));
+        }
+
+        var observation = new Observation
+        {
+            AuthorId = authorId,
+            Text = text.Trim(),
+            TimeStamp = DateTime.UtcNow
+        };
+
+        _context.Observations.Add(observation);
+        _context.SaveChanges();
+
+        // EF Core fills in the generated Id when SaveChanges runs.
+        return observation.Id;
+    }
 }
