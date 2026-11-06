@@ -123,4 +123,42 @@ public class PostRepository : IPostRepository
             })
             .ToList();
     }
+
+    public int CreateObservation(int authorId, string text, string? taxonId)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException("An observation must have text.", nameof(text));
+        }
+
+        // Fail with a clear message instead of a foreign-key error from SQLite.
+        if (!_context.Authors.Any(a => a.Id == authorId))
+        {
+            throw new ArgumentException($"No author with id {authorId} exists.", nameof(authorId));
+        }
+
+        // An empty choice means "Don't know", which is stored as no taxon.
+        if (string.IsNullOrWhiteSpace(taxonId))
+        {
+            taxonId = null;
+        }
+        else if (!_context.Taxa.Any(t => t.DwcTaxonId == taxonId))
+        {
+            throw new ArgumentException($"No taxon with id {taxonId} exists.", nameof(taxonId));
+        }
+
+        var observation = new Observation
+        {
+            AuthorId = authorId,
+            Text = text.Trim(),
+            TaxonId = taxonId,
+            TimeStamp = DateTime.UtcNow
+        };
+
+        _context.Observations.Add(observation);
+        _context.SaveChanges();
+
+        // EF Core fills in the generated Id when SaveChanges runs.
+        return observation.Id;
+    }
 }
