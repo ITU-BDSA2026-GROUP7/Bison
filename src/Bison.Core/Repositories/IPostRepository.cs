@@ -17,4 +17,11 @@ public interface IPostRepository
     // taxonId is optional: null or empty means "don't know which species".
     // Returns the id the database gave the new observation.
     int CreateObservation(int authorId, string text, string? taxonId);
+
+    // Saves a new comment on an observation. Returns the id the database gave it.
+    int CreateComment(int authorId, int observationId, string text);
+
+    // Saves a new taxon proposal on an observation. Unlike an observation,
+    // a proposal must name a taxon. Returns the id the database gave it.
+    int CreateProposal(int authorId, int observationId, string taxonId, string text);
 }

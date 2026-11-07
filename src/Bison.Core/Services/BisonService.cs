@@ -141,6 +141,9 @@ public class ObservationService : IObservationService
 public interface ICommentService
 {
     CommentPage GetComments(int observationId, int page);
+
+    // Saves a new comment on an observation. Returns the id of the new comment.
+    int CreateComment(int authorId, int observationId, string text);
 }
 
 public class CommentService : ICommentService
@@ -168,6 +171,11 @@ public class CommentService : ICommentService
         return new CommentPage(comments, hasNextPage);
     }
 
+    public int CreateComment(int authorId, int observationId, string text)
+    {
+        return _repository.CreateComment(authorId, observationId, text);
+    }
+
     private static CommentViewModel ToViewModel(CommentDTO comment)
     {
         return new CommentViewModel(
@@ -182,6 +190,9 @@ public class CommentService : ICommentService
 public interface IProposalService
 {
     ProposalPage GetProposals(int observationId, int page);
+
+    // Saves a new taxon proposal on an observation. Returns the id of the new proposal.
+    int CreateProposal(int authorId, int observationId, string taxonId, string text);
 }
 
 public class ProposalService : IProposalService
@@ -207,6 +218,11 @@ public class ProposalService : IProposalService
             .ToList();
 
         return new ProposalPage(proposals, hasNextPage);
+    }
+
+    public int CreateProposal(int authorId, int observationId, string taxonId, string text)
+    {
+        return _repository.CreateProposal(authorId, observationId, taxonId, text);
     }
 
     private static ProposalViewModel ToViewModel(ProposalDTO proposal)
