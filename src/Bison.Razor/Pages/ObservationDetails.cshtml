@@ -21,6 +21,17 @@
         </div>
 
         <h3>Comments</h3>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="observationbox">
+                <form method="post" asp-page-handler="Comment">
+                    <input style="float: left" type="text" asp-for="CommentText" placeholder="Write a comment, @(User.Identity?.Name)">
+                    <input type="submit" value="Comment">
+                </form>
+                <span asp-validation-for="CommentText"></span>
+            </div>
+        }
+
         @if (Model.Details.Comments.Observations.Any())
         {
             <ul id="messagelist" class="observations">
@@ -42,6 +53,28 @@
         }
 
         <h3>Proposals</h3>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="observationbox">
+                <form method="post" asp-page-handler="Proposal">
+                    <p>
+                        <label asp-for="ProposedTaxonId">Taxon:</label>
+                        <select asp-for="ProposedTaxonId">
+                            <option value="">Choose a taxon</option>
+                            @foreach (var taxon in Model.NamedTaxa)
+                            {
+                                <option value="@taxon.DwcTaxonId">@taxon.DanishVernacularName</option>
+                            }
+                        </select>
+                    </p>
+                    <input style="float: left" type="text" asp-for="ProposalText" placeholder="Why do you think so?">
+                    <input type="submit" value="Propose">
+                </form>
+                <span asp-validation-for="ProposalText"></span>
+                <span asp-validation-for="ProposedTaxonId"></span>
+            </div>
+        }
+        
         @if (Model.Details.Proposals.Observations.Any())
         {
             <ul id="messagelist" class="observations">

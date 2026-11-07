@@ -161,4 +161,81 @@ public class PostRepository : IPostRepository
         // EF Core fills in the generated Id when SaveChanges runs.
         return observation.Id;
     }
+
+        public int CreateComment(int authorId, int observationId, string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException("A comment must have text.", nameof(text));
+        }
+
+        EnsureAuthorExists(authorId);
+        EnsureObservationExists(observationId);
+
+        var comment = new Comment
+        {
+            AuthorId = authorId,
+            ObservationId = observationId,
+            Text = text.Trim(),
+            TimeStamp = DateTime.UtcNow
+        };
+
+        _context.Comments.Add(comment);
+        _context.SaveChanges();
+
+        return comment.Id;
+    }
+
+    public int CreateProposal(int authorId, int observationId, string taxonId, string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException("A proposal must have text.", nameof(text));
+        }
+
+        // Proposal.TaxonId is not nullable: a proposal is a suggestion of a species.
+        if (string.IsNullOrWhiteSpace(taxonId))
+        {
+            throw new ArgumentException("A proposal must name a taxon.", nameof(taxonId));
+        }
+
+        EnsureAuthorExists(authorId);
+        EnsureObservationExists(observationId);
+
+        if (!_context.Taxa.Any(t => t.DwcTaxonId == taxonId))
+        {
+            throw new ArgumentException($"No taxon with id {taxonId} exists.", nameof(taxonId));
+        }
+
+        var proposal = new Proposal
+        {
+            AuthorId = authorId,
+            ObservationId = observationId,
+            TaxonId = taxonId,
+            Text = text.Trim(),
+            TimeStamp = DateTime.UtcNow
+        };
+
+        _context.Proposals.Add(proposal);
+        _context.SaveChanges();
+
+        return proposal.Id;
+    }
+
+    // Fail with a clear message instead of a foreign-key error from SQLite.
+    private void EnsureAuthorExists(int authorId)
+    {
+        if (!_context.Authors.Any(a => a.Id == authorId))
+        {
+            throw new ArgumentException($"No author with id {authorId} exists.", nameof(authorId));
+        }
+    }
+
+    private void EnsureObservationExists(int observationId)
+    {
+        if (!_context.Observations.Any(o => o.Id == observationId))
+        {
+            throw new ArgumentException($"No observation with id {observationId} exists.", nameof(observationId));
+        }
+    }
 }
