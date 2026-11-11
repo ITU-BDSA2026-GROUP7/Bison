@@ -51,6 +51,10 @@ public class BisonDBContext : IdentityDbContext<Author, IdentityRole<int>, int>
             .HasForeignKey(o => o.TaxonId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<Observation>()
+            .Property(o => o.PicturePath)
+            .HasMaxLength(260);
+
         modelBuilder.Entity<Proposal>()
             .HasOne(p => p.Taxon)
             .WithMany()

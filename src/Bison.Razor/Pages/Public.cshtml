@@ -71,6 +71,11 @@
                         <a href="/ob/@obs.Id">@obs.Message</a>
                         <small>&mdash; @obs.Timestamp</small>
                     </p>
+                    @if (!string.IsNullOrEmpty(obs.PicturePath))
+                    {
+                        <img class="observation-picture" src="@obs.PicturePath"
+                            alt="Picture of the animal in the observation by @obs.Author" />
+                    }
                 </li>
             }
         </ul>
