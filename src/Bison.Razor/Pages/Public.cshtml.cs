@@ -14,6 +14,7 @@ public class PublicModel : PageModel
     private readonly ITaxonService _taxonService;
 
     private readonly UserManager<Author> _userManager;
+    private readonly SignInManager<Author> _signInManager;
 
     public List<TaxonViewModel> Taxa { get; set; } = new();
 
@@ -40,11 +41,13 @@ public class PublicModel : PageModel
     public PublicModel(
         IObservationService service,
         ITaxonService taxonService,
-        UserManager<Author> userManager)
+        UserManager<Author> userManager,
+        SignInManager<Author> signInManager)
     {
         _service = service;
         _taxonService = taxonService;
         _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     public ActionResult OnGet(
@@ -55,7 +58,7 @@ public class PublicModel : PageModel
         return Page();
     }
 
-    public ActionResult OnPost()
+    public async Task<ActionResult> OnPostAsync()
     {
         // Only logged-in users may make observations.
         if (User.Identity?.IsAuthenticated != true)
@@ -78,8 +81,14 @@ public class PublicModel : PageModel
             return Page();
         }
 
-        var authorId = int.Parse(_userManager.GetUserId(User)!);
-        _service.CreateObservation(authorId, Text, ObservedTaxonId);
+        var author = await _userManager.GetUserAsync(User);
+        if (author is null)
+        {
+            await _signInManager.SignOutAsync();
+            return Challenge();
+        }
+
+        _service.CreateObservation(author.Id, Text, ObservedTaxonId);
 
         // Redirect after POST, so refreshing the page does not post twice.
         return RedirectToPage();

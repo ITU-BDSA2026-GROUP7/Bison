@@ -14,6 +14,7 @@ public class UserTimelineModel : PageModel
     private readonly ITaxonService _taxonService;
 
     private readonly UserManager<Author> _userManager;
+    private readonly SignInManager<Author> _signInManager;
 
     public List<ObservationViewModel> Observations { get; set; } = new();
     public int CurrentPage { get; set; }
@@ -38,11 +39,13 @@ public class UserTimelineModel : PageModel
     public UserTimelineModel(
         IObservationService service,
         ITaxonService taxonService,
-        UserManager<Author> userManager)
+        UserManager<Author> userManager,
+        SignInManager<Author> signInManager)
     {
         _service = service;
         _taxonService = taxonService;
         _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     public async Task<ActionResult> OnGetAsync(string author, [FromQuery] int page = 1)
@@ -74,6 +77,7 @@ public class UserTimelineModel : PageModel
         var me = await _userManager.GetUserAsync(User);
         if (me == null)
         {
+            await _signInManager.SignOutAsync();
             return Challenge();
         }
 

@@ -13,6 +13,7 @@ public class ObservationDetailsModel : PageModel
     private readonly IProposalService _proposalService;
     private readonly ITaxonService _taxonService;
     private readonly UserManager<Author> _userManager;
+    private readonly SignInManager<Author> _signInManager;
 
     public ObservationDetailsPage? Details { get; private set; }
 
@@ -37,13 +38,15 @@ public class ObservationDetailsModel : PageModel
         ICommentService commentService,
         IProposalService proposalService,
         ITaxonService taxonService,
-        UserManager<Author> userManager)
+        UserManager<Author> userManager,
+        SignInManager<Author> signInManager)
     {
         _observationService = observationService;
         _commentService = commentService;
         _proposalService = proposalService;
         _taxonService = taxonService;
         _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     public IActionResult OnGet(int id, [FromQuery] int commentsPage = 1, [FromQuery] int proposalsPage = 1)
@@ -51,7 +54,7 @@ public class ObservationDetailsModel : PageModel
         return LoadDetails(id, commentsPage, proposalsPage) ? Page() : NotFound();
     }
 
-    public IActionResult OnPostComment(int id)
+    public async Task<IActionResult> OnPostComment(int id)
     {
         // Only logged-in users may comment.
         if (User.Identity?.IsAuthenticated != true)
@@ -76,14 +79,20 @@ public class ObservationDetailsModel : PageModel
             return Page();
         }
 
-        var authorId = int.Parse(_userManager.GetUserId(User)!);
-        _commentService.CreateComment(authorId, id, CommentText!);
+        var author = await _userManager.GetUserAsync(User);
+        if (author is null)
+        {
+            await _signInManager.SignOutAsync();
+            return Challenge();
+        }
+
+        _commentService.CreateComment(author.Id, id, CommentText!);
 
         // Redirect after POST, so refreshing the page does not post twice.
         return RedirectToPage(new { id });
     }
 
-    public IActionResult OnPostProposal(int id)
+    public async Task<IActionResult> OnPostProposal(int id)
     {
         if (User.Identity?.IsAuthenticated != true)
         {
@@ -114,8 +123,14 @@ public class ObservationDetailsModel : PageModel
             return Page();
         }
 
-        var authorId = int.Parse(_userManager.GetUserId(User)!);
-        _proposalService.CreateProposal(authorId, id, ProposedTaxonId!, ProposalText!);
+        var author = await _userManager.GetUserAsync(User);
+        if (author is null)
+        {
+            await _signInManager.SignOutAsync();
+            return Challenge();
+        }
+
+        _proposalService.CreateProposal(author.Id, id, ProposedTaxonId!, ProposalText!);
 
         return RedirectToPage(new { id });
     }
