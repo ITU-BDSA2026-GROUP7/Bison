@@ -1,7 +1,7 @@
 using Bison.Core.DTO;
-using Bison.Core.Repositories;
+using Bison.Infrastructure.Repositories;
 
-namespace Bison.Core.Services;
+namespace Bison.Infrastructure.Services;
 
 public interface ITaxonFilterService
 {

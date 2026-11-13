@@ -1,4 +1,3 @@
-using Bison.Core.Repositories;
 using Bison.Infrastructure.Persistence;
 using Bison.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
