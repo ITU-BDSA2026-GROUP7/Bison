@@ -99,7 +99,7 @@ public class ObservationService : IObservationService
                 o.Id,
                 o.AuthorName,
                 o.Text,
-                o.Timestamp.ToString("yyyy-MM-dd HH:mm"),
+                o.Timestamp,
                 o.PicturePath
             ))
             .ToList();

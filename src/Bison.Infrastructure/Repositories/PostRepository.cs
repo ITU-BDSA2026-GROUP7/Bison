@@ -121,7 +121,7 @@ public class PostRepository : IPostRepository
                 Id = o.Id,
                 AuthorName = o.Author.Name,
                 Text = o.Text,
-                Timestamp = o.TimeStamp,
+                Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
                 TaxonId = o.TaxonId,
                 PicturePath = o.PicturePath
             })
