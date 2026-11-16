@@ -1,6 +1,5 @@
 using Bison.Core.Domain;
 using Bison.Core.DTO;
-using Bison.Core.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Bison.Infrastructure.Persistence;
 

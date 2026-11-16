@@ -1,6 +1,6 @@
 using Bison.Core.DTO;
 
-namespace Bison.Core.Repositories;
+namespace Bison.Infrastructure.Repositories;
 
 public interface IPostRepository
 {

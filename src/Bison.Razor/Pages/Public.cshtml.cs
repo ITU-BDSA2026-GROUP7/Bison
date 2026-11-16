@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Bison.Core.Domain;
-using Bison.Core.Services;
+using Bison.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

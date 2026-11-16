@@ -1,5 +1,4 @@
 using Bison.Core.DTO;
-using Bison.Core.Repositories;
 using Bison.Infrastructure.Persistence;
 
 namespace Bison.Infrastructure.Repositories;
