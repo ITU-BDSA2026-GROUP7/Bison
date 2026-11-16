@@ -16,7 +16,7 @@ public interface IPostRepository
     // Saves a new observation written by the author with the given id.
     // taxonId is optional: null or empty means "don't know which species".
     // Returns the id the database gave the new observation.
-    int CreateObservation(int authorId, string text, string? taxonId);
+    int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null);
 
     // Saves a new comment on an observation. Returns the id the database gave it.
     int CreateComment(int authorId, int observationId, string text);

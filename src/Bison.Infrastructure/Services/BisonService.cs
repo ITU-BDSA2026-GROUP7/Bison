@@ -33,7 +33,7 @@ public interface IObservationService
     public ObservationPage GetObservationsFromAuthor(string author, int page);
     public ObservationViewModel? GetObservation(int id);
     public ObservationPage GetObservationsForTaxon(string taxonId, int page);
-    public int CreateObservation(int authorId, string text, string? taxonId);
+    public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null);
 }
 
 public class ObservationService : IObservationService
@@ -107,9 +107,9 @@ public class ObservationService : IObservationService
         return new ObservationPage(observations, hasNextPage);
     }
 
-    public int CreateObservation(int authorId, string text, string? taxonId)
+    public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null)
     {
-        return _repository.CreateObservation(authorId, text, taxonId);
+        return _repository.CreateObservation(authorId, text, taxonId, picturePath);
     }
 
     public ObservationViewModel? GetObservation(int id)

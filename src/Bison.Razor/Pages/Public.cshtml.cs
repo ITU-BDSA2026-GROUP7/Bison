@@ -15,6 +15,7 @@ public class PublicModel : PageModel
 
     private readonly UserManager<Author> _userManager;
     private readonly SignInManager<Author> _signInManager;
+    private readonly ObservationPictureStorage _pictureStorage;
 
     public List<TaxonViewModel> Taxa { get; set; } = new();
 
@@ -38,16 +39,21 @@ public class PublicModel : PageModel
     [BindProperty]
     public string? ObservedTaxonId { get; set; }
 
+    [BindProperty]
+    public IFormFile? Picture { get; set; }
+
     public PublicModel(
         IObservationService service,
         ITaxonService taxonService,
         UserManager<Author> userManager,
-        SignInManager<Author> signInManager)
+        SignInManager<Author> signInManager,
+        ObservationPictureStorage pictureStorage)
     {
         _service = service;
         _taxonService = taxonService;
         _userManager = userManager;
         _signInManager = signInManager;
+        _pictureStorage = pictureStorage;
     }
 
     public ActionResult OnGet(
@@ -88,7 +94,16 @@ public class PublicModel : PageModel
             return Challenge();
         }
 
-        _service.CreateObservation(author.Id, Text, ObservedTaxonId);
+        await using var pictureStream = Picture?.OpenReadStream();
+        var upload = await _pictureStorage.SaveAsync(pictureStream, Picture?.Length ?? 0);
+        if (upload.ErrorMessage is not null)
+        {
+            ModelState.AddModelError(nameof(Picture), upload.ErrorMessage);
+            LoadTimeline(1, null);
+            return Page();
+        }
+
+        _service.CreateObservation(author.Id, Text, ObservedTaxonId, upload.PicturePath);
 
         // Redirect after POST, so refreshing the page does not post twice.
         return RedirectToPage();
