@@ -12,7 +12,7 @@
     {
         <div class="observationbox">
             <h3>What did you see, @(User.Identity?.Name)?</h3>
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 <p>
                     <label asp-for="ObservedTaxonId">Taxon:</label>
                     <select asp-for="ObservedTaxonId">
@@ -24,10 +24,15 @@
                     </select>
                 </p>
                 <input style="float: left" type="text" asp-for="Text">
+                <p>
+                    <label asp-for="Picture">Picture (JPEG, PNG, GIF, or WebP; up to 5 MB):</label>
+                    <input type="file" asp-for="Picture" accept="image/jpeg,image/png,image/gif,image/webp">
+                </p>
                 <input type="submit" value="Share">
             </form>
             <span asp-validation-for="Text"></span>
             <span asp-validation-for="ObservedTaxonId"></span>
+            <span asp-validation-for="Picture"></span>
         </div>
     }
 

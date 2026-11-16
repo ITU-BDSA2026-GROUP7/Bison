@@ -15,6 +15,7 @@ public class UserTimelineModel : PageModel
 
     private readonly UserManager<Author> _userManager;
     private readonly SignInManager<Author> _signInManager;
+    private readonly ObservationPictureStorage _pictureStorage;
 
     public List<ObservationViewModel> Observations { get; set; } = new();
     public int CurrentPage { get; set; }
@@ -36,16 +37,21 @@ public class UserTimelineModel : PageModel
     [BindProperty]
     public string? ObservedTaxonId { get; set; }
 
+    [BindProperty]
+    public IFormFile? Picture { get; set; }
+
     public UserTimelineModel(
         IObservationService service,
         ITaxonService taxonService,
         UserManager<Author> userManager,
-        SignInManager<Author> signInManager)
+        SignInManager<Author> signInManager,
+        ObservationPictureStorage pictureStorage)
     {
         _service = service;
         _taxonService = taxonService;
         _userManager = userManager;
         _signInManager = signInManager;
+        _pictureStorage = pictureStorage;
     }
 
     public async Task<ActionResult> OnGetAsync(string author, [FromQuery] int page = 1)
@@ -83,7 +89,16 @@ public class UserTimelineModel : PageModel
 
         // The observation is always saved as the logged-in user,
         // no matter whose timeline the form was posted from.
-        _service.CreateObservation(me.Id, Text, ObservedTaxonId);
+        await using var pictureStream = Picture?.OpenReadStream();
+        var upload = await _pictureStorage.SaveAsync(pictureStream, Picture?.Length ?? 0);
+        if (upload.ErrorMessage is not null)
+        {
+            ModelState.AddModelError(nameof(Picture), upload.ErrorMessage);
+            await LoadTimelineAsync(author, 1);
+            return Page();
+        }
+
+        _service.CreateObservation(me.Id, Text, ObservedTaxonId, upload.PicturePath);
 
         return RedirectToPage(new { author });
     }

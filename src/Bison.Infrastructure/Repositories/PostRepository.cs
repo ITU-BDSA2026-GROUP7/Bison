@@ -127,7 +127,7 @@ public class PostRepository : IPostRepository
             .ToList();
     }
 
-    public int CreateObservation(int authorId, string text, string? taxonId)
+    public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -155,6 +155,7 @@ public class PostRepository : IPostRepository
             AuthorId = authorId,
             Text = text.Trim(),
             TaxonId = taxonId,
+            PicturePath = picturePath,
             TimeStamp = DateTime.UtcNow
         };
 
