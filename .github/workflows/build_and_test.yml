@@ -40,6 +40,9 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
 
+      - name: Install Playwright browsers
+        run: pwsh test/Bison.Razor.E2E.Tests/bin/Debug/net8.0/playwright.ps1 install --with-deps chromium
+
       - name: Test
         env:
           authentication__github__clientId: test-client-id
