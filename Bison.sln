@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bison.Core", "src\Bison.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bison.Infrastructure", "src\Bison.Infrastructure\Bison.Infrastructure.csproj", "{FDEC22D8-E87E-48D1-98DD-599D9E9A9E65}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bison.Razor.E2E.Tests", "test\Bison.Razor.E2E.Tests\Bison.Razor.E2E.Tests.csproj", "{94A602EB-98EA-4814-B949-0194F3D454DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,18 @@ Global
 		{FDEC22D8-E87E-48D1-98DD-599D9E9A9E65}.Release|x64.Build.0 = Release|Any CPU
 		{FDEC22D8-E87E-48D1-98DD-599D9E9A9E65}.Release|x86.ActiveCfg = Release|Any CPU
 		{FDEC22D8-E87E-48D1-98DD-599D9E9A9E65}.Release|x86.Build.0 = Release|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Debug|x64.Build.0 = Debug|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Debug|x86.Build.0 = Debug|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Release|x64.ActiveCfg = Release|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Release|x64.Build.0 = Release|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Release|x86.ActiveCfg = Release|Any CPU
+		{94A602EB-98EA-4814-B949-0194F3D454DB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,5 +96,6 @@ Global
 		{C8DBAC51-7474-422B-A11C-1C4E74290FA2} = {0C88DD14-F956-CE84-757C-A364CCF449FC}
 		{2DBE3701-46A4-4A99-8A3B-C06A8A6DC772} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{FDEC22D8-E87E-48D1-98DD-599D9E9A9E65} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{94A602EB-98EA-4814-B949-0194F3D454DB} = {0C88DD14-F956-CE84-757C-A364CCF449FC}
 	EndGlobalSection
 EndGlobal
