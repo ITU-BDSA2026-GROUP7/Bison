@@ -26,6 +26,17 @@ jobs:
       - name: Build with dotnet
         run: dotnet build src/Bison.Razor/ --configuration Release
 
+      # Run the unit and integration tests before publishing. If any test fails,
+      # this step fails, the build job stops, and the deploy job (needs: build)
+      # never runs. The Playwright E2E tests need a browser, so they only run
+      # in build_and_test.yml.
+      - name: Run tests
+        env:
+          # Dummy GitHub OAuth keys, so the app can start in the integration tests.
+          authentication__github__clientId: test-client-id
+          authentication__github__clientSecret: test-client-secret
+        run: dotnet test test/Bison.Razor.Tests --configuration Release
+
       - name: dotnet publish
         run: dotnet publish src/Bison.Razor/ -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
@@ -38,6 +49,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    # The manual "Run workflow" button lets you pick any branch.
+    # Only ever deploy main to Production.
+    if: github.ref == 'refs/heads/main'
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
