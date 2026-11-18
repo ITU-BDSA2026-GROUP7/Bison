@@ -67,7 +67,7 @@ div.page div.navigation {
   padding: 4px 10px;
   border-top: 1px solid #ccc;
   border-bottom: 1px solid #eee;
-  color: #888;
+  color: #595959;
   font-size: 12px;
   letter-spacing: 0.5px;
 }
@@ -106,7 +106,7 @@ div.page div.body {
 
 div.page div.footer {
   background: #eee;
-  color: #888;
+  color: #595959;
   padding: 5px 10px;
   font-size: 12px;
 }
@@ -149,7 +149,7 @@ div.page ul.observations li img {
 
 div.page ul.observations li small {
   font-size: 0.9em;
-  color: #888;
+  color: #595959;
 }
 
 div.page div.observationbox {
@@ -267,7 +267,7 @@ form * {
 }
 
 button {
-    background-color: #cc6e6e;
+    background-color: #a64040;
     border: none;
     color: white;
     padding: 8px 16px;
