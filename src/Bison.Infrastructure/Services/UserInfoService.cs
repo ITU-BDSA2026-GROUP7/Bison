@@ -6,21 +6,36 @@ namespace Bison.Infrastructure.Services;
 public interface IUserInfoService
 {
     UserInfoDTO? GetUserInfo(int authorId);
+
+    // "Forget me": see IAuthorRepository.ForgetAuthor. Also deletes the picture
+    // files of observations that were deleted.
+    void ForgetUser(int authorId, bool keepObservations);
 }
 
-// Thin for now, but the "Forget me!" feature and the optional
-// ZIP download will build on this service.
 public class UserInfoService : IUserInfoService
 {
     private readonly IAuthorRepository _repository;
+    private readonly ObservationPictureStorage _pictureStorage;
 
-    public UserInfoService(IAuthorRepository repository)
+    public UserInfoService(IAuthorRepository repository, ObservationPictureStorage pictureStorage)
     {
         _repository = repository;
+        _pictureStorage = pictureStorage;
     }
 
     public UserInfoDTO? GetUserInfo(int authorId)
     {
         return _repository.GetUserInfo(authorId);
+    }
+
+    public void ForgetUser(int authorId, bool keepObservations)
+    {
+        // Database first: if it fails, no picture has been deleted yet.
+        var picturePaths = _repository.ForgetAuthor(authorId, keepObservations);
+
+        foreach (var path in picturePaths)
+        {
+            _pictureStorage.Delete(path);
+        }
     }
 }

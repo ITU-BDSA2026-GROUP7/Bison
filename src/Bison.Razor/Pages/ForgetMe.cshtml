@@ -1,0 +1,42 @@
+@page "/forgetme"
+@model Bison.Razor.Pages.ForgetMeModel
+@{
+    ViewData["Title"] = "Forget me";
+    Layout = "Shared/_Layout";
+}
+
+<div>
+    <h2>Forget me</h2>
+    <p>
+        This removes your account from Bison. <strong>It cannot be undone.</strong>
+    </p>
+    <ul>
+        <li>Your name, user name, e-mail, password and GitHub link are deleted.</li>
+        <li>All your comments and proposals are deleted.</li>
+        <li>Your observations are handled as you choose below.</li>
+    </ul>
+
+    <form method="post">
+        <fieldset>
+            <legend>What should happen to your observations?</legend>
+            <p>
+                <input type="radio" name="KeepObservations" id="keep-yes" value="yes"
+                       checked="@(Model.KeepObservations == "yes")" />
+                <label for="keep-yes">Keep them online, shown as &ldquo;deleted user&rdquo;</label>
+            </p>
+            <p>
+                <input type="radio" name="KeepObservations" id="keep-no" value="no"
+                       checked="@(Model.KeepObservations == "no")" />
+                <label for="keep-no">Delete them too (including others&rsquo; comments and proposals on them)</label>
+            </p>
+        </fieldset>
+
+        @if (Model.ErrorMessage != null)
+        {
+            <p role="alert"><strong>@Model.ErrorMessage</strong></p>
+        }
+
+        <button type="submit" class="danger">Forget me permanently</button>
+        <a href="/aboutme">Cancel</a>
+    </form>
+</div>
