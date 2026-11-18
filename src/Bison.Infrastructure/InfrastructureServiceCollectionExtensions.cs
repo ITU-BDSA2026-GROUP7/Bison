@@ -17,6 +17,7 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<ITaxonRepository, TaxonRepository>();
+        services.AddScoped<IAuthorRepository, AuthorRepository>();
 
         return services;
     }

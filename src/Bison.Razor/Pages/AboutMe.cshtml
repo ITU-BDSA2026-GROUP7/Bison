@@ -1,0 +1,85 @@
+@page "/aboutme"
+@model Bison.Razor.Pages.AboutMeModel
+@{
+    ViewData["Title"] = "About me";
+    Layout = "Shared/_Layout";
+}
+
+@* Razor HTML-encodes every @value, so user-written text cannot inject scripts (XSS). *@
+<div>
+    <h2>About me</h2>
+    <p>This is all the information Bison stores about you.</p>
+
+    <h3>Personal information</h3>
+    <table class="aboutme">
+        <tr><th>Name</th><td>@Model.Info.Name</td></tr>
+        <tr><th>User name</th><td>@Model.Info.UserName</td></tr>
+        <tr><th>Email</th><td>@(Model.Info.Email ?? "(none)")</td></tr>
+        <tr><th>Email confirmed</th><td>@(Model.Info.EmailConfirmed ? "Yes" : "No")</td></tr>
+        <tr><th>Phone number</th><td>@(Model.Info.PhoneNumber ?? "(none)")</td></tr>
+        <tr><th>Password</th><td>@(Model.Info.HasPassword ? "Stored as a hash (never in plain text)" : "(none)")</td></tr>
+        <tr><th>External logins</th><td>@(Model.Info.ExternalLogins.Any() ? string.Join(", ", Model.Info.ExternalLogins) : "(none)")</td></tr>
+    </table>
+
+    <h3>My observations (@Model.Info.Observations.Count)</h3>
+    @if (Model.Info.Observations.Any())
+    {
+        <ul id="my-observations" class="observations">
+            @foreach (var ob in Model.Info.Observations)
+            {
+                <li>
+                    <a href="/ob/@ob.Id">@ob.Text</a>
+                    @if (!string.IsNullOrEmpty(ob.TaxonName))
+                    {
+                        <span>(@ob.TaxonName)</span>
+                    }
+                    <small>&mdash; @ob.Timestamp</small>
+                    @if (!string.IsNullOrEmpty(ob.PicturePath))
+                    {
+                        <img class="observation-picture" src="@ob.PicturePath" alt="Picture from your observation" />
+                    }
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <em>You have no observations.</em>
+    }
+
+    <h3>My comments (@Model.Info.Comments.Count)</h3>
+    @if (Model.Info.Comments.Any())
+    {
+        <ul id="my-comments" class="observations">
+            @foreach (var comment in Model.Info.Comments)
+            {
+                <li>
+                    @comment.Text
+                    <small>&mdash; @comment.Timestamp, on <a href="/ob/@comment.ObservationId">observation @comment.ObservationId</a></small>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <em>You have no comments.</em>
+    }
+
+    <h3>My proposals (@Model.Info.Proposals.Count)</h3>
+    @if (Model.Info.Proposals.Any())
+    {
+        <ul id="my-proposals" class="observations">
+            @foreach (var proposal in Model.Info.Proposals)
+            {
+                <li>
+                    <strong>@proposal.TaxonName</strong>: @proposal.Text
+                    <small>&mdash; @proposal.Timestamp, on <a href="/ob/@proposal.ObservationId">observation @proposal.ObservationId</a></small>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <em>You have no proposals.</em>
+    }
+</div>
