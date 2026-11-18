@@ -47,6 +47,7 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IProposalService, ProposalService>();
 builder.Services.AddScoped<ITaxonFilterService, TaxonFilterService>();
 builder.Services.AddScoped<ITaxonService, TaxonService>();
+builder.Services.AddScoped<IUserInfoService, UserInfoService>();
 builder.Services.AddScoped<ObservationPictureStorage>(
     _ => new ObservationPictureStorage(builder.Environment.WebRootPath));
 
