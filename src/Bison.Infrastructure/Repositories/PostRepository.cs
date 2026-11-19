@@ -29,7 +29,8 @@ public class PostRepository : IPostRepository
                 AuthorName = o.Author.Name,
                 TaxonName = o.Taxon.DanishVernacularName,
                 Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                PicturePath = o.PicturePath
+                PicturePath = o.PicturePath,
+                PictureLicense = o.PictureLicense
             })
             .ToList();
     }
@@ -50,7 +51,8 @@ public class PostRepository : IPostRepository
                 AuthorName = o.Author.Name,
                 TaxonName = o.Taxon.DanishVernacularName,
                 Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                PicturePath = o.PicturePath
+                PicturePath = o.PicturePath,
+                PictureLicense = o.PictureLicense
             })
             .ToList();
     }
@@ -68,7 +70,8 @@ public class PostRepository : IPostRepository
                 AuthorName = o.Author.Name,
                 TaxonName = o.Taxon.DanishVernacularName,
                 Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                PicturePath = o.PicturePath
+                PicturePath = o.PicturePath,
+                PictureLicense = o.PictureLicense
             })
             .FirstOrDefault();
     }
@@ -122,12 +125,13 @@ public class PostRepository : IPostRepository
                 Text = o.Text,
                 Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
                 TaxonId = o.TaxonId,
-                PicturePath = o.PicturePath
+                PicturePath = o.PicturePath,
+                PictureLicense = o.PictureLicense
             })
             .ToList();
     }
 
-    public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null)
+    public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null, string? pictureLicense = null)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -150,12 +154,22 @@ public class PostRepository : IPostRepository
             throw new ArgumentException($"No taxon with id {taxonId} exists.", nameof(taxonId));
         }
 
+        if (string.IsNullOrEmpty(picturePath))
+        {
+            pictureLicense = null;
+        }
+        else if (CreativeCommonsLicense.Find(pictureLicense) is null)
+        {
+            throw new ArgumentException("A picture needs a valid Creative Commons license.", nameof(pictureLicense));
+        }
+
         var observation = new Observation
         {
             AuthorId = authorId,
             Text = text.Trim(),
             TaxonId = taxonId,
             PicturePath = picturePath,
+            PictureLicense = pictureLicense,
             TimeStamp = DateTime.UtcNow
         };
 

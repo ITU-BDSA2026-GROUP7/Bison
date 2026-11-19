@@ -8,4 +8,5 @@ public string AuthorName { get; set; } = "";
 public string TaxonName { get; set; } = "";
 public string Timestamp { get; set; } = "";
 public string? PicturePath { get; set; }
+public string? PictureLicense { get; set; }
 }
