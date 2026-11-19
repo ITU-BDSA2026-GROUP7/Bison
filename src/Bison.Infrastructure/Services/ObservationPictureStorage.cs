@@ -62,6 +62,23 @@ public sealed class ObservationPictureStorage
         return new PictureUploadResult($"/uploads/observations/{fileName}", null);
     }
 
+    // Removes an uploaded picture from disk. Only the file name is used,
+    // so a path like "../../x" can never point outside the upload folder.
+    public void Delete(string? picturePath)
+    {
+        if (string.IsNullOrWhiteSpace(picturePath))
+        {
+            return;
+        }
+
+        var fileName = Path.GetFileName(picturePath);
+        var filePath = Path.Combine(_uploadDirectory, fileName);
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+    }
+
     private static string? GetImageExtension(byte[] header, int bytesRead)
     {
         if (bytesRead >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF)

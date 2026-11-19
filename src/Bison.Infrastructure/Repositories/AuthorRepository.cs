@@ -1,5 +1,8 @@
 using Bison.Core.DTO;
+using Bison.Core.Domain;
 using Bison.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Bison.Infrastructure.Repositories;
 
@@ -8,6 +11,95 @@ public class AuthorRepository : IAuthorRepository
     private const string TimestampFormat = "yyyy-MM-dd HH:mm";
 
     private readonly BisonDBContext _context;
+
+        public List<string> ForgetAuthor(int authorId, bool keepObservations)
+    {
+        // AsNoTracking: we delete with direct SQL below, so a tracked copy would go stale.
+        var author = _context.Authors.AsNoTracking().FirstOrDefault(a => a.Id == authorId);
+        if (author == null)
+        {
+            throw new ArgumentException($"No author with id {authorId} exists.", nameof(authorId));
+        }
+
+        if (author.UserName == DeletedUser.UserName)
+        {
+            throw new InvalidOperationException("The 'deleted user' placeholder cannot be forgotten.");
+        }
+
+        // All or nothing: a half-forgotten user would be worse than none.
+        using var transaction = _context.Database.BeginTransaction();
+
+        var deletedUserId = GetOrCreateDeletedUserId();
+        var picturePaths = new List<string>();
+
+        // Comments and proposals are anonymized by deletion, wherever they were written.
+        _context.Comments.Where(c => c.AuthorId == authorId).ExecuteDelete();
+        _context.Proposals.Where(p => p.AuthorId == authorId).ExecuteDelete();
+
+        if (keepObservations)
+        {
+            // Disconnect the observations from the user.
+            _context.Observations
+                .Where(o => o.AuthorId == authorId)
+                .ExecuteUpdate(s => s.SetProperty(o => o.AuthorId, deletedUserId));
+        }
+        else
+        {
+            var observationIds = _context.Observations
+                .Where(o => o.AuthorId == authorId)
+                .Select(o => o.Id);
+
+            picturePaths = _context.Observations
+                .Where(o => o.AuthorId == authorId && o.PicturePath != null)
+                .Select(o => o.PicturePath!)
+                .ToList();
+
+            // Other people's comments and proposals disappear with the observation.
+            _context.Comments.Where(c => observationIds.Contains(c.ObservationId)).ExecuteDelete();
+            _context.Proposals.Where(p => observationIds.Contains(p.ObservationId)).ExecuteDelete();
+            _context.Observations.Where(o => o.AuthorId == authorId).ExecuteDelete();
+        }
+
+        // The login data and finally the user row itself (name, e-mail, password hash ...).
+        _context.UserLogins.Where(l => l.UserId == authorId).ExecuteDelete();
+        _context.UserClaims.Where(c => c.UserId == authorId).ExecuteDelete();
+        _context.UserTokens.Where(t => t.UserId == authorId).ExecuteDelete();
+        _context.UserRoles.Where(r => r.UserId == authorId).ExecuteDelete();
+        _context.Authors.Where(a => a.Id == authorId).ExecuteDelete();
+
+        transaction.Commit();
+        return picturePaths;
+    }
+
+    // The one shared author that kept observations are handed to.
+    // It has no password and is locked out forever, so nobody can log in as it.
+    private int GetOrCreateDeletedUserId()
+    {
+        var existingId = _context.Authors
+            .Where(a => a.UserName == DeletedUser.UserName)
+            .Select(a => (int?)a.Id)
+            .FirstOrDefault();
+
+        if (existingId != null)
+        {
+            return existingId.Value;
+        }
+
+        var placeholder = new Author
+        {
+            Name = DeletedUser.Name,
+            UserName = DeletedUser.UserName,
+            NormalizedUserName = DeletedUser.UserName.ToUpperInvariant(),
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            LockoutEnabled = true,
+            LockoutEnd = DateTimeOffset.MaxValue
+        };
+
+        _context.Authors.Add(placeholder);
+        _context.SaveChanges();
+        return placeholder.Id;
+    }
 
     public AuthorRepository(BisonDBContext context)
     {

@@ -303,3 +303,13 @@ ul.nav li a {
 ul.nav li a:hover {
     background-color: #8b4949;
 }
+
+button.danger {
+    background-color: #c62828;
+    color: #ffffff;
+    border: 1px solid #8e0000;
+}
+
+button.danger:hover {
+    background-color: #8e0000;
+}
