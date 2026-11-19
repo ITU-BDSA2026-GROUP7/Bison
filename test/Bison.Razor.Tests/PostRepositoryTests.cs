@@ -132,7 +132,7 @@ public class PostRepositoryTests : IDisposable
         Assert.Empty(_context.Observations);
     }
 
-        [Fact]
+    [Fact]
     public void CreateObservationStoresThePictureLicense()
     {
         var id = _repository.CreateObservation(
