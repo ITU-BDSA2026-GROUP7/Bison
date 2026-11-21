@@ -29,11 +29,15 @@
                     <label asp-for="Picture">Picture (JPEG, PNG, GIF, or WebP; up to 5 MB):</label>
                     <input type="file" asp-for="Picture" accept="image/jpeg,image/png,image/gif,image/webp">
                 </p>
+                <p>             
+                    <partial name="_LicenseSelect" model="Model.PictureLicense" />
+                </p>
                 <input type="submit" value="Share">
             </form>
             <span asp-validation-for="Text"></span>
             <span asp-validation-for="ObservedTaxonId"></span>
             <span asp-validation-for="Picture"></span>
+            <span asp-validation-for="PictureLicense"></span>
         </div>
     }
     else
@@ -58,6 +62,7 @@
                     {
                         <img class="observation-picture" src="@ob.PicturePath"
                             alt="Picture of the animal in the observation by @ob.Author" />
+                        <partial name="_PictureLicense" model="ob.PictureLicense" />
                     }
                 </li>
             }

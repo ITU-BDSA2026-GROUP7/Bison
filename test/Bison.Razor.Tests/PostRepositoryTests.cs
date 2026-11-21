@@ -131,4 +131,33 @@ public class PostRepositoryTests : IDisposable
         Assert.Throws<ArgumentException>(() => _repository.CreateObservation(9999, "Ghost sighting", null));
         Assert.Empty(_context.Observations);
     }
+
+    [Fact]
+    public void CreateObservationStoresThePictureLicense()
+    {
+        var id = _repository.CreateObservation(
+            _author.Id, "Heron", null, "/uploads/observations/a.jpg", "by-sa-4.0");
+
+        Assert.Equal("by-sa-4.0", _context.Observations.Single(o => o.Id == id).PictureLicense);
+        Assert.Equal("by-sa-4.0", _repository.GetObservation(id)!.PictureLicense);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("all-rights-reserved")]
+    public void CreateObservationWithPictureRequiresAValidLicense(string? license)
+    {
+        Assert.Throws<ArgumentException>(() => _repository.CreateObservation(
+            _author.Id, "Heron", null, "/uploads/observations/a.jpg", license));
+        Assert.Empty(_context.Observations);
+    }
+
+    [Fact]
+    public void CreateObservationWithoutPictureStoresNoLicense()
+    {
+        var id = _repository.CreateObservation(_author.Id, "Heron", null, null, "by-4.0");
+
+        Assert.Null(_context.Observations.Single(o => o.Id == id).PictureLicense);
+    }
 }

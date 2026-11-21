@@ -55,6 +55,10 @@ public class BisonDBContext : IdentityDbContext<Author, IdentityRole<int>, int>
             .Property(o => o.PicturePath)
             .HasMaxLength(260);
 
+        modelBuilder.Entity<Observation>()
+            .Property(o => o.PictureLicense)
+            .HasMaxLength(CreativeCommonsLicense.MaxCodeLength);
+
         modelBuilder.Entity<Proposal>()
             .HasOne(p => p.Taxon)
             .WithMany()

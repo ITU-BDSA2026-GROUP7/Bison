@@ -8,6 +8,7 @@ public class ObservationListDTO
     public string TaxonName {get; set;} = ""; 
     public string Timestamp {get; set;} = ""; 
     public string? PicturePath { get; set; }
+    public string? PictureLicense { get; set; }
 
     public List<CommentDTO> Comments {get; set;} = new();
 

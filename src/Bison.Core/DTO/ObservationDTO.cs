@@ -9,4 +9,5 @@ public class ObservationDTO
     public string Timestamp { get; set; } = "";
     public string? TaxonId { get; set; }
     public string? PicturePath { get; set; }
+    public string? PictureLicense { get; set; }
 }

@@ -40,6 +40,9 @@ public class UserTimelineModel : PageModel
     [BindProperty]
     public IFormFile? Picture { get; set; }
 
+    [BindProperty]
+    public string? PictureLicense { get; set; }
+
     public UserTimelineModel(
         IObservationService service,
         ITaxonService taxonService,
@@ -74,6 +77,12 @@ public class UserTimelineModel : PageModel
             ModelState.AddModelError(nameof(ObservedTaxonId), "Pick a taxon from the list.");
         }
 
+        if (Picture is { Length: > 0 } &&
+            CreativeCommonsLicense.Find(PictureLicense) is null)
+        {
+            ModelState.AddModelError(nameof(PictureLicense), "Choose a Creative Commons license for your picture.");
+        }
+
         if (!ModelState.IsValid)
         {
             await LoadTimelineAsync(author, 1);
@@ -98,7 +107,7 @@ public class UserTimelineModel : PageModel
             return Page();
         }
 
-        _service.CreateObservation(me.Id, Text, ObservedTaxonId, upload.PicturePath);
+        _service.CreateObservation(me.Id, Text, ObservedTaxonId, upload.PicturePath, PictureLicense);
 
         return RedirectToPage(new { author });
     }
