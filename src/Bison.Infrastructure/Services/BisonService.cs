@@ -3,11 +3,11 @@ using Bison.Infrastructure.Repositories;
 
 namespace Bison.Infrastructure.Services;
 
-public record ObservationViewModel(int Id, string Author, string Message, string Timestamp, string? PicturePath = null);
+public record ObservationViewModel(int Id, string Author, string Message, string Timestamp, string? PicturePath = null, int upvotes, int downvotes);
 
-public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp);
+public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp, int upvotes, int downvotes);
 
-public record ProposalViewModel(int Id, string TaxonName, string Author, string Message, string Timestamp);
+public record ProposalViewModel(int Id, string TaxonName, string Author, string Message, string Timestamp, int upvotes, int downvotes);
 
 public record ObservationPage(
     List<ObservationViewModel> Observations,
@@ -109,7 +109,7 @@ public class ObservationService : IObservationService
 
     public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null)
     {
-        return _repository.CreateObservation(authorId, text, taxonId, picturePath);
+        return _repository.CreateObservation(authorId, text, taxonId, picturePath, 0, 0);
     }
 
     public ObservationViewModel? GetObservation(int id)
@@ -127,6 +127,8 @@ public class ObservationService : IObservationService
             observation.Text,
             observation.Timestamp,
             observation.PicturePath
+            0,
+            0
         );
     }
     private static ObservationViewModel ToViewModel(ObservationListDTO observation)
