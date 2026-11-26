@@ -3,11 +3,11 @@ using Bison.Infrastructure.Repositories;
 
 namespace Bison.Infrastructure.Services;
 
-public record ObservationViewModel(int Id, string Author, string Message, string Timestamp, string? PicturePath = null, int upvotes, int downvotes);
+public record ObservationViewModel(int Id, string Author, string Message, string Timestamp, int UpVotes, int DownVotes, string? PicturePath = null);
 
-public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp, int upvotes, int downvotes);
+public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp);
 
-public record ProposalViewModel(int Id, string TaxonName, string Author, string Message, string Timestamp, int upvotes, int downvotes);
+public record ProposalViewModel(int Id, string TaxonName, string Author, string Message, string Timestamp);
 
 public record ObservationPage(
     List<ObservationViewModel> Observations,
@@ -100,7 +100,9 @@ public class ObservationService : IObservationService
                 o.AuthorName,
                 o.Text,
                 o.Timestamp,
-                o.PicturePath
+                o.PicturePath,
+                o.UpVotes,
+                o.DownVotes
             ))
             .ToList();
 
@@ -119,16 +121,16 @@ public class ObservationService : IObservationService
         return observation == null ? null : ToViewModel(observation);
     }
 
-    private static ObservationViewModel ToViewModel(ObservationDetailsDTO observation)
+    private static ObservationViewModel ToViewModel(ObservationDTO observation)
     {
         return new ObservationViewModel(
             observation.Id,
             observation.AuthorName,
             observation.Text,
             observation.Timestamp,
-            observation.PicturePath
-            0,
-            0
+            observation.PicturePath,
+            observation.UpVotes,
+            observation.DownVotes
         );
     }
     private static ObservationViewModel ToViewModel(ObservationListDTO observation)
@@ -138,7 +140,9 @@ public class ObservationService : IObservationService
             observation.AuthorName,
             observation.Text,
             observation.Timestamp,
-            observation.PicturePath
+            observation.PicturePath,
+            observation.UpVotes,
+            observation.DownVotes
         );
     }
 }

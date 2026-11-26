@@ -1,3 +1,4 @@
+/*
 namespace Bison.Core.DTO;
 
 public class ObservationDetailsDTO
@@ -9,3 +10,4 @@ public string TaxonName { get; set; } = "";
 public string Timestamp { get; set; } = "";
 public string? PicturePath { get; set; }
 }
+*/

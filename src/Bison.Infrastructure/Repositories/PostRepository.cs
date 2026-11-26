@@ -55,7 +55,8 @@ public class PostRepository : IPostRepository
             .ToList();
     }
 
-    public ObservationDetailsDTO? GetObservation(int id)
+     /*
+    public ObservationDetailsDTO? GetObservationDetails(int id)
     {
         return _context.Observations
             .Include(o => o.Author)
@@ -72,11 +73,81 @@ public class PostRepository : IPostRepository
             })
             .FirstOrDefault();
     }
+    */ 
 
+    public PostDTO? GetPost(int id)
+    {
+        var post = _context.Posts
+            .SingleOrDefault(p => p.Id == id);
+            
+        switch (post)
+        {
+            case Observation observation:
+                return GetObservation(id);
+            case Comment comment:
+                return GetComment(id);
+            case Proposal proposal:
+                return GetProposal(id);
+        }
+        return null;
+    }
+
+
+    public ObservationDTO? GetObservation(int id)
+    {
+        return _context.Observations
+            .Include(o => o.Author)
+            .Include(o => o.Taxon)
+            .Where(o => o.Id == id)
+            .Select(o => new ObservationDTO
+            {
+                Id = o.Id,
+                Text = o.Text,
+                AuthorName = o.Author.Name,
+                TaxonName = o.Taxon.DanishVernacularName,
+                Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
+                PicturePath = o.PicturePath
+            })
+            .FirstOrDefault();
+    }
+
+    public CommentDTO? GetComment(int id)
+    {
+        return _context.Comments
+            .Include(c => c.Author)
+            .Include(c => c.Observation)
+            .Where(c => c.Id == id)
+            .Select(c => new CommentDTO
+            {
+                Id = c.Id,
+                Text = c.Text,
+                AuthorName = c.Author.Name,
+                Timestamp = c.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
+                ObservationId = c.Observation.Id
+            })
+            .FirstOrDefault();
+    }
+    public ProposalDTO? GetProposal(int id)
+    {
+        return _context.Proposals
+            .Include(p => p.Author)
+            .Include(p => p.Taxon)
+            .Where(p => p.Id == id)
+            .Select(p => new ProposalDTO
+            {
+                Id = p.Id,
+                Text = p.Text,
+                AuthorName = p.Author.Name,
+                TaxonName = p.Taxon.DanishVernacularName,
+                Timestamp = p.TimeStamp.ToString("yyyy-MM-dd HH:mm")
+            })
+            .FirstOrDefault();
+    }
     public List<CommentDTO> GetComments(int observationId, int skip, int take)
     {
         return _context.Comments
             .Include(c => c.Author)
+            .Include(c => c.Observation)
             .Where(c => c.ObservationId == observationId)
             .OrderByDescending(c => c.TimeStamp)
             .Skip(skip)
@@ -86,7 +157,8 @@ public class PostRepository : IPostRepository
                 Id = c.Id,
                 Text = c.Text,
                 AuthorName = c.Author.Name,
-                Timestamp = c.TimeStamp.ToString("yyyy-MM-dd HH:mm")
+                Timestamp = c.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
+                ObservationId = c.Observation.Id
             })
             .ToList();
     }

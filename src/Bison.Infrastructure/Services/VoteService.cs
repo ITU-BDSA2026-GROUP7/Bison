@@ -1,3 +1,4 @@
+using Bison.Core.Domain;
 using Bison.Infrastructure.Repositories;
 
 public interface IVoteService {
@@ -20,5 +21,10 @@ public class VoteService : IVoteService {
         var post = _repository.GetObservation(postId);
         // check if author already upvoted
         _repository.upvote()
+    }
+
+    public void downvote(int postId, int authorId)
+    {
+        var post = _repository.
     }
 }
