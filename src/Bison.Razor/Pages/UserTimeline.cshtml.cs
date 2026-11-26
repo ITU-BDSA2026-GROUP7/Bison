@@ -10,6 +10,7 @@ namespace Bison.Razor.Pages;
 public class UserTimelineModel : PageModel
 {
     private readonly IObservationService _service;
+    private readonly IVoteService _voteService;
 
     private readonly ITaxonService _taxonService;
 
@@ -42,12 +43,14 @@ public class UserTimelineModel : PageModel
 
     public UserTimelineModel(
         IObservationService service,
+        IVoteService voteService,
         ITaxonService taxonService,
         UserManager<Author> userManager,
         SignInManager<Author> signInManager,
         ObservationPictureStorage pictureStorage)
     {
         _service = service;
+        _voteService = voteService;
         _taxonService = taxonService;
         _userManager = userManager;
         _signInManager = signInManager;
@@ -101,6 +104,32 @@ public class UserTimelineModel : PageModel
         _service.CreateObservation(me.Id, Text, ObservedTaxonId, upload.PicturePath);
 
         return RedirectToPage(new { author });
+    }
+
+    public async Task<IActionResult> OnPostVoteAsync(string author, int postId, bool direction, int page = 1)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            return Challenge();
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null)
+        {
+            await _signInManager.SignOutAsync();
+            return Challenge();
+        }
+
+        if (direction)
+        {
+            _voteService.Upvote(postId, user.Id);
+        }
+        else
+        {
+            _voteService.Downvote(postId, user.Id);
+        }
+
+        return RedirectToPage("/UserTimeline", new { author, page = Math.Max(page, 1) });
     }
 
     private async Task LoadTimelineAsync(string author, int page)

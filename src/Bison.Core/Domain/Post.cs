@@ -10,4 +10,8 @@ public abstract class Post
 
     public int AuthorId { get; set; }
     public Author Author { get; set; } = null!;
+
+    public int UpVotes { get; set; }
+
+    public int DownVotes { get; set; }
 }

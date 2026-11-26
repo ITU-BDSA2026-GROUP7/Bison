@@ -10,6 +10,7 @@ namespace Bison.Razor.Pages;
 public class PublicModel : PageModel
 {
     private readonly IObservationService _service;
+    private readonly IVoteService _voteService;
 
     private readonly ITaxonService _taxonService;
 
@@ -44,12 +45,14 @@ public class PublicModel : PageModel
 
     public PublicModel(
         IObservationService service,
+        IVoteService voteService,
         ITaxonService taxonService,
         UserManager<Author> userManager,
         SignInManager<Author> signInManager,
         ObservationPictureStorage pictureStorage)
     {
         _service = service;
+        _voteService = voteService;
         _taxonService = taxonService;
         _userManager = userManager;
         _signInManager = signInManager;
@@ -107,6 +110,36 @@ public class PublicModel : PageModel
 
         // Redirect after POST, so refreshing the page does not post twice.
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostVoteAsync(
+        int postId,
+        bool direction,
+        int page = 1,
+        string? taxonId = null)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            return Challenge();
+        }
+
+        var author = await _userManager.GetUserAsync(User);
+        if (author is null)
+        {
+            await _signInManager.SignOutAsync();
+            return Challenge();
+        }
+
+        if (direction)
+        {
+            _voteService.Upvote(postId, author.Id);
+        }
+        else
+        {
+            _voteService.Downvote(postId, author.Id);
+        }
+
+        return RedirectToPage("/Public", new { page = Math.Max(page, 1), taxonId });
     }
 
     private void LoadTimeline(int page, string? taxonId)

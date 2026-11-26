@@ -5,9 +5,9 @@ namespace Bison.Infrastructure.Services;
 
 public record ObservationViewModel(int Id, string Author, string Message, string Timestamp, int UpVotes, int DownVotes, string? PicturePath = null);
 
-public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp);
+public record CommentViewModel(int Id, string Author, string Message, string Timestamp, int UpVotes, int DownVotes);
 
-public record ProposalViewModel(int Id, string TaxonName, string Author, string Message, string Timestamp);
+public record ProposalViewModel(int Id, string TaxonName, string Author, string Message, string Timestamp, int UpVotes, int DownVotes);
 
 public record ObservationPage(
     List<ObservationViewModel> Observations,
@@ -100,9 +100,9 @@ public class ObservationService : IObservationService
                 o.AuthorName,
                 o.Text,
                 o.Timestamp,
-                o.PicturePath,
                 o.UpVotes,
-                o.DownVotes
+                o.DownVotes,
+                o.PicturePath
             ))
             .ToList();
 
@@ -111,7 +111,7 @@ public class ObservationService : IObservationService
 
     public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null)
     {
-        return _repository.CreateObservation(authorId, text, taxonId, picturePath, 0, 0);
+        return _repository.CreateObservation(authorId, text, taxonId, picturePath);
     }
 
     public ObservationViewModel? GetObservation(int id)
@@ -128,21 +128,9 @@ public class ObservationService : IObservationService
             observation.AuthorName,
             observation.Text,
             observation.Timestamp,
-            observation.PicturePath,
             observation.UpVotes,
-            observation.DownVotes
-        );
-    }
-    private static ObservationViewModel ToViewModel(ObservationListDTO observation)
-    {
-        return new ObservationViewModel(
-            observation.Id,
-            observation.AuthorName,
-            observation.Text,
-            observation.Timestamp,
-            observation.PicturePath,
-            observation.UpVotes,
-            observation.DownVotes
+            observation.DownVotes,
+            observation.PicturePath
         );
     }
 }
@@ -191,7 +179,9 @@ public class CommentService : ICommentService
             comment.Id,
             comment.AuthorName,
             comment.Text,
-            comment.Timestamp
+            comment.Timestamp,
+            comment.UpVotes,
+            comment.DownVotes
         );
     }
 }
@@ -241,7 +231,9 @@ public class ProposalService : IProposalService
             proposal.TaxonName,
             proposal.AuthorName,
             proposal.Text,
-            proposal.Timestamp
+            proposal.Timestamp,
+            proposal.UpVotes,
+            proposal.DownVotes
         );
     }
 }

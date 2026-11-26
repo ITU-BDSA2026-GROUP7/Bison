@@ -11,6 +11,7 @@ public class ObservationDetailsModel : PageModel
     private readonly IObservationService _observationService;
     private readonly ICommentService _commentService;
     private readonly IProposalService _proposalService;
+    private readonly IVoteService _voteService;
     private readonly ITaxonService _taxonService;
     private readonly UserManager<Author> _userManager;
     private readonly SignInManager<Author> _signInManager;
@@ -37,6 +38,7 @@ public class ObservationDetailsModel : PageModel
         IObservationService observationService,
         ICommentService commentService,
         IProposalService proposalService,
+        IVoteService voteService,
         ITaxonService taxonService,
         UserManager<Author> userManager,
         SignInManager<Author> signInManager)
@@ -44,6 +46,7 @@ public class ObservationDetailsModel : PageModel
         _observationService = observationService;
         _commentService = commentService;
         _proposalService = proposalService;
+        _voteService = voteService;
         _taxonService = taxonService;
         _userManager = userManager;
         _signInManager = signInManager;
@@ -133,6 +136,32 @@ public class ObservationDetailsModel : PageModel
         _proposalService.CreateProposal(author.Id, id, ProposedTaxonId!, ProposalText!);
 
         return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostVoteAsync(int id, int postId, bool direction)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            return Challenge();
+        }
+
+        var author = await _userManager.GetUserAsync(User);
+        if (author is null)
+        {
+            await _signInManager.SignOutAsync();
+            return Challenge();
+        }
+
+        if (direction)
+        {
+            _voteService.Upvote(postId, author.Id);
+        }
+        else
+        {
+            _voteService.Downvote(postId, author.Id);
+        }
+
+        return RedirectToPage("/ObservationDetails", new { id });
     }
 
     // Shared by OnGet and by the handlers that show the page again after an error.

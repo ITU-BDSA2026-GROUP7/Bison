@@ -14,7 +14,7 @@ public class PostRepository : IPostRepository
         _context = context;
     }
 
-    public List<ObservationListDTO> GetObservations(int skip, int take)
+    public List<ObservationDTO> GetObservations(int skip, int take)
     {
         return _context.Observations
             .Include(o => o.Author)
@@ -22,19 +22,21 @@ public class PostRepository : IPostRepository
             .OrderByDescending(o => o.TimeStamp)
             .Skip(skip)
             .Take(take)
-            .Select(o => new ObservationListDTO
+            .Select(o => new ObservationDTO
             {
                 Id = o.Id,
                 Text = o.Text,
                 AuthorName = o.Author.Name,
                 TaxonName = o.Taxon.DanishVernacularName,
                 Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                PicturePath = o.PicturePath
+                PicturePath = o.PicturePath,
+                UpVotes = o.UpVotes,
+                DownVotes = o.DownVotes
             })
             .ToList();
     }
 
-    public List<ObservationListDTO> GetObservationsFromAuthor(string author, int skip, int take)
+    public List<ObservationDTO> GetObservationsFromAuthor(string author, int skip, int take)
     {
         return _context.Observations
             .Include(o => o.Author)
@@ -43,55 +45,19 @@ public class PostRepository : IPostRepository
             .OrderByDescending(o => o.TimeStamp)
             .Skip(skip)
             .Take(take)
-            .Select(o => new ObservationListDTO
+            .Select(o => new ObservationDTO
             {
                 Id = o.Id,
                 Text = o.Text,
                 AuthorName = o.Author.Name,
                 TaxonName = o.Taxon.DanishVernacularName,
                 Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                PicturePath = o.PicturePath
+                PicturePath = o.PicturePath,
+                UpVotes = o.UpVotes,
+                DownVotes = o.DownVotes
             })
             .ToList();
     }
-
-     /*
-    public ObservationDetailsDTO? GetObservationDetails(int id)
-    {
-        return _context.Observations
-            .Include(o => o.Author)
-            .Include(o => o.Taxon)
-            .Where(o => o.Id == id)
-            .Select(o => new ObservationDetailsDTO
-            {
-                Id = o.Id,
-                Text = o.Text,
-                AuthorName = o.Author.Name,
-                TaxonName = o.Taxon.DanishVernacularName,
-                Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                PicturePath = o.PicturePath
-            })
-            .FirstOrDefault();
-    }
-    */ 
-
-    public PostDTO? GetPost(int id)
-    {
-        var post = _context.Posts
-            .SingleOrDefault(p => p.Id == id);
-            
-        switch (post)
-        {
-            case Observation observation:
-                return GetObservation(id);
-            case Comment comment:
-                return GetComment(id);
-            case Proposal proposal:
-                return GetProposal(id);
-        }
-        return null;
-    }
-
 
     public ObservationDTO? GetObservation(int id)
     {
@@ -106,40 +72,9 @@ public class PostRepository : IPostRepository
                 AuthorName = o.Author.Name,
                 TaxonName = o.Taxon.DanishVernacularName,
                 Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                PicturePath = o.PicturePath
-            })
-            .FirstOrDefault();
-    }
-
-    public CommentDTO? GetComment(int id)
-    {
-        return _context.Comments
-            .Include(c => c.Author)
-            .Include(c => c.Observation)
-            .Where(c => c.Id == id)
-            .Select(c => new CommentDTO
-            {
-                Id = c.Id,
-                Text = c.Text,
-                AuthorName = c.Author.Name,
-                Timestamp = c.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                ObservationId = c.Observation.Id
-            })
-            .FirstOrDefault();
-    }
-    public ProposalDTO? GetProposal(int id)
-    {
-        return _context.Proposals
-            .Include(p => p.Author)
-            .Include(p => p.Taxon)
-            .Where(p => p.Id == id)
-            .Select(p => new ProposalDTO
-            {
-                Id = p.Id,
-                Text = p.Text,
-                AuthorName = p.Author.Name,
-                TaxonName = p.Taxon.DanishVernacularName,
-                Timestamp = p.TimeStamp.ToString("yyyy-MM-dd HH:mm")
+                PicturePath = o.PicturePath,
+                UpVotes = o.UpVotes,
+                DownVotes = o.DownVotes
             })
             .FirstOrDefault();
     }
@@ -158,7 +93,9 @@ public class PostRepository : IPostRepository
                 Text = c.Text,
                 AuthorName = c.Author.Name,
                 Timestamp = c.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                ObservationId = c.Observation.Id
+                ObservationId = c.Observation.Id,
+                UpVotes = c.UpVotes,
+                DownVotes = c.DownVotes
             })
             .ToList();
     }
@@ -178,7 +115,10 @@ public class PostRepository : IPostRepository
                 Text = p.Text,
                 AuthorName = p.Author.Name,
                 TaxonName = p.Taxon.DanishVernacularName,
-                Timestamp = p.TimeStamp.ToString("yyyy-MM-dd HH:mm")
+                Timestamp = p.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
+                ObservationId = p.ObservationId,
+                UpVotes = p.UpVotes,
+                DownVotes = p.DownVotes
             })
             .ToList();
     }
@@ -194,7 +134,9 @@ public class PostRepository : IPostRepository
                 Text = o.Text,
                 Timestamp = o.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
                 TaxonId = o.TaxonId,
-                PicturePath = o.PicturePath
+                PicturePath = o.PicturePath,
+                UpVotes = o.UpVotes,
+                DownVotes = o.DownVotes
             })
             .ToList();
     }
@@ -228,7 +170,9 @@ public class PostRepository : IPostRepository
             Text = text.Trim(),
             TaxonId = taxonId,
             PicturePath = picturePath,
-            TimeStamp = DateTime.UtcNow
+            TimeStamp = DateTime.UtcNow,
+            UpVotes = 0,
+            DownVotes = 0,
         };
 
         _context.Observations.Add(observation);
@@ -253,7 +197,9 @@ public class PostRepository : IPostRepository
             AuthorId = authorId,
             ObservationId = observationId,
             Text = text.Trim(),
-            TimeStamp = DateTime.UtcNow
+            TimeStamp = DateTime.UtcNow,
+            UpVotes = 0,
+            DownVotes = 0
         };
 
         _context.Comments.Add(comment);
@@ -289,13 +235,32 @@ public class PostRepository : IPostRepository
             ObservationId = observationId,
             TaxonId = taxonId,
             Text = text.Trim(),
-            TimeStamp = DateTime.UtcNow
+            TimeStamp = DateTime.UtcNow,
+            UpVotes = 0,
+            DownVotes = 0
         };
 
         _context.Proposals.Add(proposal);
         _context.SaveChanges();
 
         return proposal.Id;
+    }
+
+    public void Vote(int postId, int authorID, bool direction)
+    {
+        var post = _context.Posts.SingleOrDefault(p => p.Id == postId)
+            ?? throw new ArgumentException($"No post with id {postId} exists.", nameof(postId));
+
+        if (direction)
+        {
+            post.UpVotes++;
+        }
+        else
+        {
+            post.DownVotes++;
+        }
+
+        _context.SaveChanges();
     }
 
     // Fail with a clear message instead of a foreign-key error from SQLite.

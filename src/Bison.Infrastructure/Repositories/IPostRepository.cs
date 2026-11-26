@@ -5,14 +5,12 @@ namespace Bison.Infrastructure.Repositories;
 
 public interface IPostRepository
 {
-    public List<ObservationListDTO> GetObservations(int skip, int take);
+    public List<ObservationDTO> GetObservations(int skip, int take);
 
     List<ObservationDTO> GetObservationsForTaxonFilter();
-    List<ObservationListDTO> GetObservationsFromAuthor(string author, int skip, int take);
-    PostDTO? GetPost(int id);
+    List<ObservationDTO> GetObservationsFromAuthor(string author, int skip, int take);
 
     ObservationDTO? GetObservation(int id);
-    //ObservationDetailsDTO? GetObservationDetails(int id);
 
     List<CommentDTO> GetComments(int observationId, int skip, int take);
     List<ProposalDTO> GetProposals(int observationId, int skip, int take);
@@ -28,4 +26,6 @@ public interface IPostRepository
     // Saves a new taxon proposal on an observation. Unlike an observation,
     // a proposal must name a taxon. Returns the id the database gave it.
     int CreateProposal(int authorId, int observationId, string taxonId, string text);
+
+    void Vote(int postId, int authorID, bool direction);
 }

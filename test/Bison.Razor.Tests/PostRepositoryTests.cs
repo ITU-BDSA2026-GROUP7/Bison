@@ -131,4 +131,5 @@ public class PostRepositoryTests : IDisposable
         Assert.Throws<ArgumentException>(() => _repository.CreateObservation(9999, "Ghost sighting", null));
         Assert.Empty(_context.Observations);
     }
+
 }
