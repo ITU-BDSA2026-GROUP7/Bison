@@ -16,6 +16,7 @@ public static class InfrastructureServiceCollectionExtensions
             options.UseSqlite($"Data Source={efDbPath}"));
 
         services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<IVoteRepository, VoteRepository>();
         services.AddScoped<ITaxonRepository, TaxonRepository>();
         services.AddScoped<IAuthorRepository, AuthorRepository>();
 

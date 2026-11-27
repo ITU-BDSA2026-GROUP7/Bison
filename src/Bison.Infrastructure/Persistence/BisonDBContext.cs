@@ -38,26 +38,20 @@ public class BisonDBContext : IdentityDbContext<Author, IdentityRole<int>, int>
             .WithMany(a => a.Posts)
             .HasForeignKey(p => p.AuthorId);
 
-        modelBuilder.Entity<Author>()
-            .HasMany(a => a.VotedPosts)
-            .WithMany()
-            .UsingEntity<Vote>(
-                vote => vote
-                    .HasOne<Post>()
-                    .WithMany()
-                    .HasForeignKey(v => v.PostId)
-                    .OnDelete(DeleteBehavior.Cascade),
-                vote => vote
-                    .HasOne(v => v.Author)
-                    .WithMany()
-                    .HasForeignKey(v => v.AuthorId)
-                    .OnDelete(DeleteBehavior.Cascade),
-                vote =>
-                {
-                    vote.ToTable("Votes");
-                    vote.HasKey(v => v.Id);
-                    vote.HasIndex(v => new { v.AuthorId, v.PostId }).IsUnique();
-                });
+        modelBuilder.Entity<Vote>(vote =>
+        {
+            vote.ToTable("Votes");
+            vote.HasKey(v => v.Id);
+            vote.HasOne(v => v.Author)
+                .WithMany(a => a.Votes)
+                .HasForeignKey(v => v.AuthorId)
+                .OnDelete(DeleteBehavior.Cascade);
+            vote.HasOne<Post>()
+                .WithMany()
+                .HasForeignKey(v => v.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+            vote.HasIndex(v => new { v.AuthorId, v.PostId }).IsUnique();
+        });
 
         modelBuilder.Entity<Comment>()
             .HasOne(c => c.Observation)

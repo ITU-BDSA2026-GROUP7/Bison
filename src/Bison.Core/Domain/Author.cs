@@ -12,5 +12,5 @@ public class Author : IdentityUser<int>
 
     public List<Post> Posts { get; set; } = new();
 
-    public List<Post> VotedPosts { get; set; } = new();
+    public List<Vote> Votes { get; set; } = new();
 }

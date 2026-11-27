@@ -6,6 +6,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Bison.Core.Domain;
 
 // Integration tests for the "about me" page: they start the whole web
 // app in memory and send real HTTP requests, like LoginTests.
@@ -94,6 +95,42 @@ public class AboutMePageTests : IAsyncLifetime
         Assert.Contains("Eduard", html);
         Assert.Contains("edka@itu.dk", html);
         Assert.DoesNotContain("debloh@itu.dk", html);
+    }
+
+    [Fact]
+    public async Task LoggedInUserSeesOwnVotes()
+    {
+        using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+        await PostLoginAsync(client, "edka@itu.dk", "123456");
+
+        int postId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<BisonDBContext>();
+            var author = dbContext.Authors.Single(a => a.UserName == "edka@itu.dk");
+            var post = dbContext.Observations.First();
+            postId = post.Id;
+
+            dbContext.Votes.Add(new Vote
+            {
+                AuthorId = author.Id,
+                PostId = postId,
+                Direction = true,
+                TimeStamp = DateTime.UtcNow
+            });
+            await dbContext.SaveChangesAsync();
+        }
+
+        var response = await client.GetAsync("/aboutme");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("My votes (1)", html);
+        Assert.Contains($"Upvoted", html);
+        Assert.Contains($"post {postId}", html);
     }
 
     // Same helper as in LoginTests: copy the antiforgery token from the

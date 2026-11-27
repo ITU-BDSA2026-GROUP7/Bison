@@ -2,6 +2,7 @@ using Bison.Core.DTO;
 using Bison.Core.Domain;
 using Bison.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 
 
 namespace Bison.Infrastructure.Repositories;
@@ -170,7 +171,17 @@ public class AuthorRepository : IAuthorRepository
                 })
                 .ToList(),
 
-            //VotedPosts = _context.Posts.
+            Votes = _context.Votes
+                .Where(v => v.AuthorId == authorId)
+                .OrderByDescending(v => v.TimeStamp)
+                .Select(v => new VoteDTO
+                {
+                    Id = v.Id,
+                    PostId = v.PostId,
+                    Direction = v.Direction,
+                    Timestamp = v.TimeStamp.ToString(TimestampFormat)
+                })
+                .ToList(),
         };
     }
 }
