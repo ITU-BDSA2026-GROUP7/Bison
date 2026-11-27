@@ -4,6 +4,7 @@ using Bison.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bison.Razor.Pages;
 
@@ -120,13 +121,24 @@ public class UserTimelineModel : PageModel
             return Challenge();
         }
 
-        if (direction)
+        try
         {
-            _voteService.Upvote(postId, user.Id);
+            if (direction)
+            {
+                _voteService.Upvote(postId, user.Id);
+            }
+            else
+            {
+                _voteService.Downvote(postId, user.Id);
+            }
         }
-        else
+        catch (ArgumentException)
         {
-            _voteService.Downvote(postId, user.Id);
+            TempData["VoteError"] = "You have already voted on this post, or the post could not be found.";
+        }
+        catch (DbUpdateException)
+        {
+            TempData["VoteError"] = "Your vote could not be saved. Please try again.";
         }
 
         return RedirectToPage("/UserTimeline", new { author, page = Math.Max(page, 1) });

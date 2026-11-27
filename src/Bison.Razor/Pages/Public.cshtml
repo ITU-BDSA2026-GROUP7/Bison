@@ -7,6 +7,10 @@
 
 <div>
     <h2> Public Observations </h2>
+    @if (TempData["VoteError"] is string voteError)
+    {
+        <div class="error" role="alert">@voteError</div>
+    }
 
     @if (User.Identity?.IsAuthenticated == true)
     {

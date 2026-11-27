@@ -3,6 +3,7 @@ using Bison.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bison.Razor.Pages;
 
@@ -152,13 +153,24 @@ public class ObservationDetailsModel : PageModel
             return Challenge();
         }
 
-        if (direction)
+        try
         {
-            _voteService.Upvote(postId, author.Id);
+            if (direction)
+            {
+                _voteService.Upvote(postId, author.Id);
+            }
+            else
+            {
+                _voteService.Downvote(postId, author.Id);
+            }
         }
-        else
+        catch (ArgumentException)
         {
-            _voteService.Downvote(postId, author.Id);
+            TempData["VoteError"] = "You have already voted on this post, or the post could not be found.";
+        }
+        catch (DbUpdateException)
+        {
+            TempData["VoteError"] = "Your vote could not be saved. Please try again.";
         }
 
         return RedirectToPage("/ObservationDetails", new { id });

@@ -7,6 +7,11 @@
 }
 
 <div>
+    @if (TempData["VoteError"] is string voteError)
+    {
+        <div class="error" role="alert">@voteError</div>
+    }
+
     @if (Model.IsOwnTimeline)
     {
         <h2> My Observations </h2>

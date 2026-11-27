@@ -7,6 +7,10 @@
 
 <div>
     <h2>Observation</h2>
+    @if (TempData["VoteError"] is string voteError)
+    {
+        <div class="error" role="alert">@voteError</div>
+    }
 
     @if (Model.Details is not null)
     {

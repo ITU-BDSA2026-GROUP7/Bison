@@ -89,4 +89,19 @@ public class VoteRepositoryTests : IDisposable
         Assert.True(_repository.HasVotedPost(_observation.Id, _author.Id, true));
         Assert.False(_repository.HasVotedPost(_observation.Id, _author.Id, false));
     }
+
+    [Fact]
+    public void VoteRejectsOppositeDirectionAfterExistingVote()
+    {
+        _repository.Vote(_observation.Id, _author.Id, true);
+
+        Assert.Throws<ArgumentException>(
+            () => _repository.Vote(_observation.Id, _author.Id, false));
+
+        _context.ChangeTracker.Clear();
+        var storedPost = _context.Posts.Single(p => p.Id == _observation.Id);
+        Assert.Equal(1, storedPost.UpVotes);
+        Assert.Equal(0, storedPost.DownVotes);
+        Assert.Single(_context.Votes);
+    }
 }

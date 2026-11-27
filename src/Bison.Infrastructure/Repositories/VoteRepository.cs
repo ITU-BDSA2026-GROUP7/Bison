@@ -12,10 +12,11 @@ public class VoteRepository : IVoteRepository
     }
     public void Vote(int postId, int authorId, bool direction)
     {
-        if (HasVotedPost(postId, authorId, direction))
+        if (HasVotedPost(postId, authorId, direction) ||
+            HasVotedPost(postId, authorId, !direction))
         {
             throw new ArgumentException(
-                $"Author {authorId} has already cast this vote on post {postId}.",
+                $"Author {authorId} has already voted on post {postId}.",
                 nameof(direction));
         }
 
