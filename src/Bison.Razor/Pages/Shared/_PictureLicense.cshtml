@@ -1,0 +1,11 @@
+@using Bison.Core.Domain
+@model string?
+@{
+    var license = CreativeCommonsLicense.Find(Model);
+}
+@if (license is not null)
+{
+    <small class="picture-license">
+        License: <a href="@license.Url" target="_blank" rel="license noopener noreferrer">@license.Name</a>
+    </small>
+}

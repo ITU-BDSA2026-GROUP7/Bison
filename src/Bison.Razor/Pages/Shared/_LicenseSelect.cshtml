@@ -1,0 +1,22 @@
+@using Bison.Core.Domain
+@model string?
+@* Creative Commons license picker for the upload forms. It posts as "PictureLicense". *@
+<label for="PictureLicense">License of the picture (required when you upload one):</label>
+<select id="PictureLicense" name="PictureLicense">
+    <option value="">Choose a license</option>
+    @foreach (var license in CreativeCommonsLicense.All)
+    {
+        <option value="@license.Code" selected="@(license.Code == Model)">@license.Name</option>
+    }
+</select>
+<a href="https://creativecommons.org/licenses/" target="_blank" rel="noopener noreferrer">About the licenses</a>
+<script>
+    // A license is only needed together with a picture, so only require it then.
+    (function () {
+        var license = document.getElementById("PictureLicense");
+        var picture = license.form.querySelector('input[type="file"]');
+        function sync() { license.required = picture.files.length > 0; }
+        picture.addEventListener("change", sync);
+        sync();
+    })();
+</script>

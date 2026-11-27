@@ -3,7 +3,15 @@ using Bison.Infrastructure.Repositories;
 
 namespace Bison.Infrastructure.Services;
 
-public record ObservationViewModel(int Id, string Author, string Message, string Timestamp, int UpVotes, int DownVotes, string? PicturePath = null);
+public record ObservationViewModel(
+    int Id,
+    string Author,
+    string Message,
+    string Timestamp,
+    string? PicturePath = null,
+    string? PictureLicense = null,
+    int UpVotes = 0,
+    int DownVotes = 0);
 
 public record CommentViewModel(int Id, string Author, string Message, string Timestamp, int UpVotes, int DownVotes);
 
@@ -33,7 +41,7 @@ public interface IObservationService
     public ObservationPage GetObservationsFromAuthor(string author, int page);
     public ObservationViewModel? GetObservation(int id);
     public ObservationPage GetObservationsForTaxon(string taxonId, int page);
-    public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null);
+    public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null, string? pictureLicense = null);
 }
 
 public class ObservationService : IObservationService
@@ -100,18 +108,19 @@ public class ObservationService : IObservationService
                 o.AuthorName,
                 o.Text,
                 o.Timestamp,
+                o.PicturePath,
+                o.PictureLicense,
                 o.UpVotes,
-                o.DownVotes,
-                o.PicturePath
+                o.DownVotes
             ))
             .ToList();
 
         return new ObservationPage(observations, hasNextPage);
     }
 
-    public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null)
+    public int CreateObservation(int authorId, string text, string? taxonId, string? picturePath = null, string? pictureLicense = null)
     {
-        return _repository.CreateObservation(authorId, text, taxonId, picturePath);
+        return _repository.CreateObservation(authorId, text, taxonId, picturePath, pictureLicense);
     }
 
     public ObservationViewModel? GetObservation(int id)
@@ -128,9 +137,22 @@ public class ObservationService : IObservationService
             observation.AuthorName,
             observation.Text,
             observation.Timestamp,
+            observation.PicturePath,
+            observation.PictureLicense,
             observation.UpVotes,
-            observation.DownVotes,
-            observation.PicturePath
+            observation.DownVotes
+        );
+    }
+
+    private static ObservationViewModel ToViewModel(ObservationListDTO observation)
+    {
+        return new ObservationViewModel(
+            observation.Id,
+            observation.AuthorName,
+            observation.Text,
+            observation.Timestamp,
+            observation.PicturePath,
+            observation.PictureLicense
         );
     }
 }

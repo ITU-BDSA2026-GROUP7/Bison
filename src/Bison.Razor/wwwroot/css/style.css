@@ -330,3 +330,9 @@ button.danger {
 button.danger:hover {
     background-color: #8e0000;
 }
+
+small.picture-license {
+  display: block;
+  margin: 0 0 6px 0;
+  font-size: 0.8em;
+}

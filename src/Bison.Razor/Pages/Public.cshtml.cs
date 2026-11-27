@@ -44,6 +44,9 @@ public class PublicModel : PageModel
     [BindProperty]
     public IFormFile? Picture { get; set; }
 
+    [BindProperty]
+    public string? PictureLicense { get; set; }
+
     public PublicModel(
         IObservationService service,
         IVoteService voteService,
@@ -84,6 +87,12 @@ public class PublicModel : PageModel
             ModelState.AddModelError(nameof(ObservedTaxonId), "Pick a taxon from the list.");
         }
 
+        if (Picture is { Length: > 0 } &&
+            CreativeCommonsLicense.Find(PictureLicense) is null)
+        {
+            ModelState.AddModelError(nameof(PictureLicense), "Choose a Creative Commons license for your picture.");
+        }
+
         if (!ModelState.IsValid)
         {
             // Show the page again, with the error message next to the form.
@@ -107,7 +116,7 @@ public class PublicModel : PageModel
             return Page();
         }
 
-        _service.CreateObservation(author.Id, Text, ObservedTaxonId, upload.PicturePath);
+        _service.CreateObservation(author.Id, Text, ObservedTaxonId, upload.PicturePath, PictureLicense);
 
         // Redirect after POST, so refreshing the page does not post twice.
         return RedirectToPage();

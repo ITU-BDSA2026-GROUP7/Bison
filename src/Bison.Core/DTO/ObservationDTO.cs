@@ -6,4 +6,5 @@ public class ObservationDTO : PostDTO
     public string? TaxonId { get; set; }
     public string? TaxonName { get; set; }
     public string? PicturePath { get; set; }
+    public string? PictureLicense { get; set; }
 }

@@ -125,7 +125,7 @@ public class ForgetMeRepositoryTests : IDisposable
     [Fact]
     public void NotKeepingObservationsDeletesThemAndTheirComments()
     {
-        var id = _posts.CreateObservation(_me.Id, "My heron", null, "/uploads/observations/abc.jpg");
+        var id = _posts.CreateObservation(_me.Id, "My heron", null, "/uploads/observations/abc.jpg", "by-4.0");
         _posts.CreateComment(_other.Id, id, "Great photo");
         _posts.CreateProposal(_other.Id, id, _taxon.DwcTaxonId, "Heron?");
 
