@@ -11,4 +11,6 @@ public class Author : IdentityUser<int>
     public string Name { get; set; } = string.Empty;
 
     public List<Post> Posts { get; set; } = new();
+
+    public List<Post> VotedPosts { get; set; } = new();
 }

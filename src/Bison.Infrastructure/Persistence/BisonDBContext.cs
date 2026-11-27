@@ -17,11 +17,16 @@ public class BisonDBContext : IdentityDbContext<Author, IdentityRole<int>, int>
     public DbSet<Proposal> Proposals => Set<Proposal>();
     public DbSet<Author> Authors => Set<Author>();
     public DbSet<Taxon> Taxa => Set<Taxon>();
+    public DbSet<Vote> Votes => Set<Vote>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Must run first: it configures all the Identity tables and keys.
         base.OnModelCreating(modelBuilder);
+
+        // Posts and votes share a CLR base class, but are separate database entities.
+        modelBuilder.Entity<Post>().HasBaseType((Type?)null);
+        modelBuilder.Entity<Vote>().HasBaseType((Type?)null);
 
         modelBuilder.Entity<Post>().HasDiscriminator<string>("Discriminator")
             .HasValue<Observation>("Observation")
@@ -32,6 +37,27 @@ public class BisonDBContext : IdentityDbContext<Author, IdentityRole<int>, int>
             .HasOne(p => p.Author)
             .WithMany(a => a.Posts)
             .HasForeignKey(p => p.AuthorId);
+
+        modelBuilder.Entity<Author>()
+            .HasMany(a => a.VotedPosts)
+            .WithMany()
+            .UsingEntity<Vote>(
+                vote => vote
+                    .HasOne<Post>()
+                    .WithMany()
+                    .HasForeignKey(v => v.PostId)
+                    .OnDelete(DeleteBehavior.Cascade),
+                vote => vote
+                    .HasOne(v => v.Author)
+                    .WithMany()
+                    .HasForeignKey(v => v.AuthorId)
+                    .OnDelete(DeleteBehavior.Cascade),
+                vote =>
+                {
+                    vote.ToTable("Votes");
+                    vote.HasKey(v => v.Id);
+                    vote.HasIndex(v => new { v.AuthorId, v.PostId }).IsUnique();
+                });
 
         modelBuilder.Entity<Comment>()
             .HasOne(c => c.Observation)

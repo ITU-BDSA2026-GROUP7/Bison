@@ -1,15 +1,8 @@
 namespace Bison.Core.Domain;
 
-public abstract class Post
+public abstract class Post : AuthoredEntity
 {
-    public int Id { get; set; }
-
     public string Text { get; set; } = string.Empty;
-
-    public DateTime TimeStamp { get; set; }
-
-    public int AuthorId { get; set; }
-    public Author Author { get; set; } = null!;
 
     public int UpVotes { get; set; }
 

@@ -26,6 +26,4 @@ public interface IPostRepository
     // Saves a new taxon proposal on an observation. Unlike an observation,
     // a proposal must name a taxon. Returns the id the database gave it.
     int CreateProposal(int authorId, int observationId, string taxonId, string text);
-
-    void Vote(int postId, int authorID, bool direction);
 }

@@ -10,9 +10,9 @@ public interface IVoteService
 
 public class VoteService : IVoteService
 {
-    private readonly IPostRepository _repository;
+    private readonly IVoteRepository _repository;
 
-    public VoteService(IPostRepository repository)
+    public VoteService(IVoteRepository repository)
     {
         _repository = repository;
     }

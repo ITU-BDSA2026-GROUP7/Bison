@@ -245,24 +245,7 @@ public class PostRepository : IPostRepository
 
         return proposal.Id;
     }
-
-    public void Vote(int postId, int authorID, bool direction)
-    {
-        var post = _context.Posts.SingleOrDefault(p => p.Id == postId)
-            ?? throw new ArgumentException($"No post with id {postId} exists.", nameof(postId));
-
-        if (direction)
-        {
-            post.UpVotes++;
-        }
-        else
-        {
-            post.DownVotes++;
-        }
-
-        _context.SaveChanges();
-    }
-
+    
     // Fail with a clear message instead of a foreign-key error from SQLite.
     private void EnsureAuthorExists(int authorId)
     {

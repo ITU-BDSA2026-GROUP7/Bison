@@ -168,7 +168,9 @@ public class AuthorRepository : IAuthorRepository
                     Text = p.Text,
                     Timestamp = p.TimeStamp.ToString(TimestampFormat)
                 })
-                .ToList()
+                .ToList(),
+
+            //VotedPosts = _context.Posts.
         };
     }
 }

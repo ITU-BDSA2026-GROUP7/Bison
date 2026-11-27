@@ -22,4 +22,5 @@ public class UserInfoDTO
     public List<ObservationDTO> Observations { get; set; } = new();
     public List<CommentDTO> Comments { get; set; } = new();
     public List<ProposalDTO> Proposals { get; set; } = new();
+    //public List<PostDTO> VotedPosts { get; set; } = new();
 }
