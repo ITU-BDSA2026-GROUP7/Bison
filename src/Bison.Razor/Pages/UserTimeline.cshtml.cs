@@ -125,16 +125,38 @@ public class UserTimelineModel : PageModel
         {
             if (direction)
             {
-                _voteService.Upvote(postId, user.Id);
+                if (_voteService.HasVotedPost(postId, user.Id, direction))
+                {
+                    _voteService.RemoveUpvote(postId, user.Id);
+                }
+                else if (_voteService.HasVotedPost(postId, user.Id, !direction))
+                {
+                    TempData["VoteError"] = "You have already voted on this post in the opposite direction.";
+                }
+                else
+                {
+                    _voteService.Upvote(postId, user.Id);
+                }
             }
             else
             {
-                _voteService.Downvote(postId, user.Id);
+                if (_voteService.HasVotedPost(postId, user.Id, direction))
+                {
+                    _voteService.RemoveDownvote(postId, user.Id);
+                }
+                else if (_voteService.HasVotedPost(postId, user.Id, !direction))
+                {
+                    TempData["VoteError"] = "You have already voted on this post in the opposite direction.";
+                }
+                else
+                {
+                    _voteService.Downvote(postId, user.Id);
+                }
             }
         }
         catch (ArgumentException)
         {
-            TempData["VoteError"] = "You have already voted on this post, or the post could not be found.";
+            TempData["VoteError"] = "The post could not be found.";
         }
         catch (DbUpdateException)
         {

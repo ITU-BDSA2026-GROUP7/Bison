@@ -135,11 +135,33 @@ public class PublicModel : PageModel
         {
             if (direction)
             {
-                _voteService.Upvote(postId, author.Id);
+                if (_voteService.HasVotedPost(postId, author.Id, direction))
+                {
+                    _voteService.RemoveUpvote(postId, author.Id);
+                }
+                else if (_voteService.HasVotedPost(postId, author.Id, !direction))
+                {
+                    TempData["VoteError"] = "You have already voted on this post in the opposite direction.";
+                }
+                else
+                {
+                    _voteService.Upvote(postId, author.Id);
+                }
             }
             else
             {
-                _voteService.Downvote(postId, author.Id);
+                if (_voteService.HasVotedPost(postId, author.Id, direction))
+                {
+                    _voteService.RemoveDownvote(postId, author.Id);
+                }
+                else if (_voteService.HasVotedPost(postId, author.Id, !direction))
+                {
+                    TempData["VoteError"] = "You have already voted on this post in the opposite direction.";
+                }
+                else
+                {
+                    _voteService.Downvote(postId, author.Id);
+                }
             }
         }
         catch (ArgumentException)

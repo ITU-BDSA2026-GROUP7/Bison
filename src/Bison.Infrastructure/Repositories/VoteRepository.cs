@@ -45,7 +45,40 @@ public class VoteRepository : IVoteRepository
         };
 
         _context.Votes.Add(vote);
+        _context.SaveChanges();
+    }
 
+    public void RemoveVote(int postId, int authorId, bool direction)
+    {
+        if (!HasVotedPost(postId, authorId, direction) ||
+            HasVotedPost(postId, authorId, !direction))
+        {
+            throw new ArgumentException(
+                $"Author {authorId} has not {direction} voted on post {postId}.",
+                nameof(direction));
+        }
+
+        var post = _context.Posts.SingleOrDefault(p => p.Id == postId)
+            ?? throw new ArgumentException($"No post with id {postId} exists.", nameof(postId));
+
+        var author = _context.Authors.SingleOrDefault(a => a.Id == authorId)
+            ?? throw new ArgumentException($"No author with id {authorId} exists.", nameof(authorId));
+
+        if (direction)
+        {
+            post.UpVotes--;
+        }
+        else
+        {
+            post.DownVotes--;
+        }
+
+        var vote = _context.Votes.Single(v =>
+            v.PostId == postId &&
+            v.AuthorId == authorId &&
+            v.Direction == direction);
+
+        _context.Votes.Remove(vote);
         _context.SaveChanges();
     }
 
