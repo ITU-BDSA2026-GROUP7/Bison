@@ -7,6 +7,10 @@
 
 <div>
     <h2> Public Observations </h2>
+    @if (TempData["VoteError"] is string voteError)
+    {
+        <div class="error" role="alert">@voteError</div>
+    }
 
     @if (User.Identity?.IsAuthenticated == true)
     {
@@ -85,6 +89,20 @@
                         <img class="observation-picture" src="@obs.PicturePath"
                             alt="Picture of the animal in the observation by @obs.Author" />
                         <partial name="_PictureLicense" model="obs.PictureLicense" />
+                    }
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form method="post" asp-page-handler="Vote" class="vote-controls">
+                            <input type="hidden" name="postId" value="@obs.Id" />
+                            <input type="hidden" name="page" value="@Model.CurrentPage" />
+                            <input type="hidden" name="taxonId" value="@Model.SelectedTaxonId" />
+                            <button type="submit" name="direction" value="true">Upvote (@obs.UpVotes)</button>
+                            <button type="submit" name="direction" value="false">Downvote (@obs.DownVotes)</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="vote-counts">Upvotes: @obs.UpVotes | Downvotes: @obs.DownVotes</p>
                     }
                 </li>
             }

@@ -7,6 +7,10 @@
 
 <div>
     <h2>Observation</h2>
+    @if (TempData["VoteError"] is string voteError)
+    {
+        <div class="error" role="alert">@voteError</div>
+    }
 
     @if (Model.Details is not null)
     {
@@ -23,6 +27,18 @@
                 <img class="observation-picture detail"
                     src="@Model.Details.Observation.PicturePath"
                     alt="Picture of the animal in the observation by @Model.Details.Observation.Author" />
+            }
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <form method="post" asp-page-handler="Vote" class="vote-controls">
+                    <input type="hidden" name="postId" value="@Model.Details.Observation.Id" />
+                    <button type="submit" name="direction" value="true">Upvote (@Model.Details.Observation.UpVotes)</button>
+                    <button type="submit" name="direction" value="false">Downvote (@Model.Details.Observation.DownVotes)</button>
+                </form>
+            }
+            else
+            {
+                <p class="vote-counts">Upvotes: @Model.Details.Observation.UpVotes | Downvotes: @Model.Details.Observation.DownVotes</p>
             }
         </div>
 
@@ -49,6 +65,18 @@
                             @comment.Message
                             <small>&mdash; @comment.Timestamp</small>
                         </p>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <form method="post" asp-page-handler="Vote" class="vote-controls">
+                                <input type="hidden" name="postId" value="@comment.Id" />
+                                <button type="submit" name="direction" value="true">Upvote (@comment.UpVotes)</button>
+                                <button type="submit" name="direction" value="false">Downvote (@comment.DownVotes)</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <p class="vote-counts">Upvotes: @comment.UpVotes | Downvotes: @comment.DownVotes</p>
+                        }
                     </li>
                 }
             </ul>
@@ -93,6 +121,18 @@
                             <small>&mdash; @proposal.Timestamp</small>
                         </p>
                         <p>Taxon: @proposal.TaxonName</p>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <form method="post" asp-page-handler="Vote" class="vote-controls">
+                                <input type="hidden" name="postId" value="@proposal.Id" />
+                                <button type="submit" name="direction" value="true">Upvote (@proposal.UpVotes)</button>
+                                <button type="submit" name="direction" value="false">Downvote (@proposal.DownVotes)</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <p class="vote-counts">Upvotes: @proposal.UpVotes | Downvotes: @proposal.DownVotes</p>
+                        }
                     </li>
                 }
             </ul>

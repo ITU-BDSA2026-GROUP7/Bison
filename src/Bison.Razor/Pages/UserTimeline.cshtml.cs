@@ -4,12 +4,14 @@ using Bison.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bison.Razor.Pages;
 
 public class UserTimelineModel : PageModel
 {
     private readonly IObservationService _service;
+    private readonly IVoteService _voteService;
 
     private readonly ITaxonService _taxonService;
 
@@ -45,12 +47,14 @@ public class UserTimelineModel : PageModel
 
     public UserTimelineModel(
         IObservationService service,
+        IVoteService voteService,
         ITaxonService taxonService,
         UserManager<Author> userManager,
         SignInManager<Author> signInManager,
         ObservationPictureStorage pictureStorage)
     {
         _service = service;
+        _voteService = voteService;
         _taxonService = taxonService;
         _userManager = userManager;
         _signInManager = signInManager;
@@ -110,6 +114,65 @@ public class UserTimelineModel : PageModel
         _service.CreateObservation(me.Id, Text, ObservedTaxonId, upload.PicturePath, PictureLicense);
 
         return RedirectToPage(new { author });
+    }
+
+    public async Task<IActionResult> OnPostVoteAsync(string author, int postId, bool direction, int page = 1)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            return Challenge();
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null)
+        {
+            await _signInManager.SignOutAsync();
+            return Challenge();
+        }
+
+        try
+        {
+            if (direction)
+            {
+                if (_voteService.HasVotedPost(postId, user.Id, direction))
+                {
+                    _voteService.RemoveUpvote(postId, user.Id);
+                }
+                else if (_voteService.HasVotedPost(postId, user.Id, !direction))
+                {
+                    TempData["VoteError"] = "You have already voted on this post in the opposite direction.";
+                }
+                else
+                {
+                    _voteService.Upvote(postId, user.Id);
+                }
+            }
+            else
+            {
+                if (_voteService.HasVotedPost(postId, user.Id, direction))
+                {
+                    _voteService.RemoveDownvote(postId, user.Id);
+                }
+                else if (_voteService.HasVotedPost(postId, user.Id, !direction))
+                {
+                    TempData["VoteError"] = "You have already voted on this post in the opposite direction.";
+                }
+                else
+                {
+                    _voteService.Downvote(postId, user.Id);
+                }
+            }
+        }
+        catch (ArgumentException)
+        {
+            TempData["VoteError"] = "The post could not be found.";
+        }
+        catch (DbUpdateException)
+        {
+            TempData["VoteError"] = "Your vote could not be saved. Please try again.";
+        }
+
+        return RedirectToPage("/UserTimeline", new { author, page = Math.Max(page, 1) });
     }
 
     private async Task LoadTimelineAsync(string author, int page)

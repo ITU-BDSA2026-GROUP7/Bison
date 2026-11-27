@@ -82,6 +82,26 @@
     {
         <em>You have no proposals.</em>
     }
+
+    <h3>My votes (@Model.Info.Votes.Count)</h3>
+    @if (Model.Info.Votes.Any())
+    {
+        <ul id="my-votes" class="observations">
+            @foreach (var vote in Model.Info.Votes)
+            {
+                <li>
+                    @(vote.Direction ? "Upvoted" : "Downvoted")
+                    post @vote.PostId
+                    <small>&mdash; @vote.Timestamp</small>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <em>You have no votes.</em>
+    }
+
     <h3>Forget me</h3>
     <p>You can ask Bison to delete everything it stores about you.</p>
         <form method="get" action="/forgetme">

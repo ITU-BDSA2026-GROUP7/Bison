@@ -266,6 +266,23 @@ form * {
     margin: 2px 0;
 }
 
+.vote-controls {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.vote-controls button {
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.vote-counts {
+    margin: 4px 0 0;
+    font-size: 0.9em;
+    color: #595959;
+}
+
 button {
     background-color: #a64040;
     border: none;

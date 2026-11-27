@@ -2,6 +2,7 @@ using Bison.Core.DTO;
 using Bison.Core.Domain;
 using Bison.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 
 
 namespace Bison.Infrastructure.Repositories;
@@ -134,7 +135,7 @@ public class AuthorRepository : IAuthorRepository
             Observations = _context.Observations
                 .Where(o => o.AuthorId == authorId)
                 .OrderByDescending(o => o.TimeStamp)
-                .Select(o => new ObservationListDTO
+                .Select(o => new ObservationDTO
                 {
                     Id = o.Id,
                     Text = o.Text,
@@ -148,7 +149,7 @@ public class AuthorRepository : IAuthorRepository
             Comments = _context.Comments
                 .Where(c => c.AuthorId == authorId)
                 .OrderByDescending(c => c.TimeStamp)
-                .Select(c => new UserCommentDTO
+                .Select(c => new CommentDTO
                 {
                     Id = c.Id,
                     ObservationId = c.ObservationId,
@@ -160,7 +161,7 @@ public class AuthorRepository : IAuthorRepository
             Proposals = _context.Proposals
                 .Where(p => p.AuthorId == authorId)
                 .OrderByDescending(p => p.TimeStamp)
-                .Select(p => new UserProposalDTO
+                .Select(p => new ProposalDTO
                 {
                     Id = p.Id,
                     ObservationId = p.ObservationId,
@@ -168,7 +169,19 @@ public class AuthorRepository : IAuthorRepository
                     Text = p.Text,
                     Timestamp = p.TimeStamp.ToString(TimestampFormat)
                 })
-                .ToList()
+                .ToList(),
+
+            Votes = _context.Votes
+                .Where(v => v.AuthorId == authorId)
+                .OrderByDescending(v => v.TimeStamp)
+                .Select(v => new VoteDTO
+                {
+                    Id = v.Id,
+                    PostId = v.PostId,
+                    Direction = v.Direction,
+                    Timestamp = v.TimeStamp.ToString(TimestampFormat)
+                })
+                .ToList(),
         };
     }
 }

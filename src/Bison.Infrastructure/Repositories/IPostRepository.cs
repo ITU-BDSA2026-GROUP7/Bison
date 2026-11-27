@@ -1,14 +1,16 @@
+using System.Data.Common;
 using Bison.Core.DTO;
 
 namespace Bison.Infrastructure.Repositories;
 
 public interface IPostRepository
 {
-    public List<ObservationListDTO> GetObservations(int skip, int take);
+    public List<ObservationDTO> GetObservations(int skip, int take);
 
     List<ObservationDTO> GetObservationsForTaxonFilter();
-    List<ObservationListDTO> GetObservationsFromAuthor(string author, int skip, int take);
-    ObservationDetailsDTO? GetObservation(int id);
+    List<ObservationDTO> GetObservationsFromAuthor(string author, int skip, int take);
+
+    ObservationDTO? GetObservation(int id);
 
     List<CommentDTO> GetComments(int observationId, int skip, int take);
     List<ProposalDTO> GetProposals(int observationId, int skip, int take);

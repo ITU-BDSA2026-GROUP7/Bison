@@ -4,12 +4,14 @@ using Bison.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bison.Razor.Pages;
 
 public class PublicModel : PageModel
 {
     private readonly IObservationService _service;
+    private readonly IVoteService _voteService;
 
     private readonly ITaxonService _taxonService;
 
@@ -47,12 +49,14 @@ public class PublicModel : PageModel
 
     public PublicModel(
         IObservationService service,
+        IVoteService voteService,
         ITaxonService taxonService,
         UserManager<Author> userManager,
         SignInManager<Author> signInManager,
         ObservationPictureStorage pictureStorage)
     {
         _service = service;
+        _voteService = voteService;
         _taxonService = taxonService;
         _userManager = userManager;
         _signInManager = signInManager;
@@ -116,6 +120,69 @@ public class PublicModel : PageModel
 
         // Redirect after POST, so refreshing the page does not post twice.
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostVoteAsync(
+        int postId,
+        bool direction,
+        int page = 1,
+        string? taxonId = null)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            return Challenge();
+        }
+
+        var author = await _userManager.GetUserAsync(User);
+        if (author is null)
+        {
+            await _signInManager.SignOutAsync();
+            return Challenge();
+        }
+
+        try
+        {
+            if (direction)
+            {
+                if (_voteService.HasVotedPost(postId, author.Id, direction))
+                {
+                    _voteService.RemoveUpvote(postId, author.Id);
+                }
+                else if (_voteService.HasVotedPost(postId, author.Id, !direction))
+                {
+                    TempData["VoteError"] = "You have already voted on this post in the opposite direction.";
+                }
+                else
+                {
+                    _voteService.Upvote(postId, author.Id);
+                }
+            }
+            else
+            {
+                if (_voteService.HasVotedPost(postId, author.Id, direction))
+                {
+                    _voteService.RemoveDownvote(postId, author.Id);
+                }
+                else if (_voteService.HasVotedPost(postId, author.Id, !direction))
+                {
+                    TempData["VoteError"] = "You have already voted on this post in the opposite direction.";
+                }
+                else
+                {
+                    _voteService.Downvote(postId, author.Id);
+                }
+            }
+        }
+        catch (ArgumentException)
+        {
+            TempData["VoteError"] = "You have already voted on this post, or the post could not be found.";
+        }
+        catch (DbUpdateException)
+        {
+            TempData["VoteError"] = "Your vote could not be saved. Please try again.";
+        }
+
+        return RedirectToPage("/Public", new { page = Math.Max(page, 1), taxonId });
     }
 
     private void LoadTimeline(int page, string? taxonId)

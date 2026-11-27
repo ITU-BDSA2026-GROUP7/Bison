@@ -3,11 +3,19 @@ using Bison.Infrastructure.Repositories;
 
 namespace Bison.Infrastructure.Services;
 
-public record ObservationViewModel(int Id, string Author, string Message, string Timestamp, string? PicturePath = null, string? PictureLicense = null);
+public record ObservationViewModel(
+    int Id,
+    string Author,
+    string Message,
+    string Timestamp,
+    string? PicturePath = null,
+    string? PictureLicense = null,
+    int UpVotes = 0,
+    int DownVotes = 0);
 
-public record CommentViewModel(int ObservationId, string Author, string Message, string Timestamp);
+public record CommentViewModel(int Id, string Author, string Message, string Timestamp, int UpVotes, int DownVotes);
 
-public record ProposalViewModel(int Id, string TaxonName, string Author, string Message, string Timestamp);
+public record ProposalViewModel(int Id, string TaxonName, string Author, string Message, string Timestamp, int UpVotes, int DownVotes);
 
 public record ObservationPage(
     List<ObservationViewModel> Observations,
@@ -101,7 +109,9 @@ public class ObservationService : IObservationService
                 o.Text,
                 o.Timestamp,
                 o.PicturePath,
-                o.PictureLicense
+                o.PictureLicense,
+                o.UpVotes,
+                o.DownVotes
             ))
             .ToList();
 
@@ -120,7 +130,7 @@ public class ObservationService : IObservationService
         return observation == null ? null : ToViewModel(observation);
     }
 
-    private static ObservationViewModel ToViewModel(ObservationDetailsDTO observation)
+    private static ObservationViewModel ToViewModel(ObservationDTO observation)
     {
         return new ObservationViewModel(
             observation.Id,
@@ -128,9 +138,12 @@ public class ObservationService : IObservationService
             observation.Text,
             observation.Timestamp,
             observation.PicturePath,
-            observation.PictureLicense
+            observation.PictureLicense,
+            observation.UpVotes,
+            observation.DownVotes
         );
     }
+
     private static ObservationViewModel ToViewModel(ObservationListDTO observation)
     {
         return new ObservationViewModel(
@@ -188,7 +201,9 @@ public class CommentService : ICommentService
             comment.Id,
             comment.AuthorName,
             comment.Text,
-            comment.Timestamp
+            comment.Timestamp,
+            comment.UpVotes,
+            comment.DownVotes
         );
     }
 }
@@ -238,7 +253,9 @@ public class ProposalService : IProposalService
             proposal.TaxonName,
             proposal.AuthorName,
             proposal.Text,
-            proposal.Timestamp
+            proposal.Timestamp,
+            proposal.UpVotes,
+            proposal.DownVotes
         );
     }
 }
